@@ -1,5 +1,16 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Dados iniciais (seed)
+
+Para popular o Firestore com jogadores e partidas de exemplo:
+
+```bash
+npm run seed
+```
+*As regras do Firestore precisam permitir escrita. Configure em Firebase Console → Firestore → Regras.*
+
+Copie o conteúdo de `firestore.rules` para o Firebase Console.
+
 ## Getting Started
 
 First, run the development server:
