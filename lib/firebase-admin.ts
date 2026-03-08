@@ -10,6 +10,7 @@ function getAdminApp() {
 
   const credentialsPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
   const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT;
+  const serviceAccountBase64 = process.env.FIREBASE_SERVICE_ACCOUNT_BASE64;
 
   let credential;
 
@@ -23,6 +24,13 @@ function getAdminApp() {
         `Erro ao carregar ${credentialsPath}: ${err instanceof Error ? err.message : "arquivo inválido"}`
       );
     }
+  } else if (serviceAccountBase64) {
+    try {
+      const jsonStr = Buffer.from(serviceAccountBase64, "base64").toString("utf-8");
+      credential = cert(JSON.parse(jsonStr) as ServiceAccount);
+    } catch {
+      throw new Error("FIREBASE_SERVICE_ACCOUNT_BASE64 inválido.");
+    }
   } else if (serviceAccountJson) {
     try {
       credential = cert(JSON.parse(serviceAccountJson) as ServiceAccount);
@@ -31,7 +39,7 @@ function getAdminApp() {
     }
   } else {
     throw new Error(
-      "Configure GOOGLE_APPLICATION_CREDENTIALS (caminho do JSON) ou FIREBASE_SERVICE_ACCOUNT (JSON) em .env.local ou nas variáveis do App Hosting"
+      "Configure GOOGLE_APPLICATION_CREDENTIALS, FIREBASE_SERVICE_ACCOUNT ou FIREBASE_SERVICE_ACCOUNT_BASE64"
     );
   }
 

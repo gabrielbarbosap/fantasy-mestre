@@ -95,9 +95,17 @@ export async function GET(
       u.position = i + 1;
     });
 
-    const playersMap = new Map(
-      playersSnap.docs.map((d) => [d.id, { ...d.data(), playerId: d.id }])
-    );
+    type PlayerData = { name?: string; number?: number; position?: string; photo?: string };
+    const playersMap = new Map<string, PlayerData>();
+    playersSnap.docs.forEach((d) => {
+      const data = d.data() as Record<string, unknown>;
+      playersMap.set(d.id, {
+        name: data?.name as string | undefined,
+        number: data?.number as number | undefined,
+        position: data?.position as string | undefined,
+        photo: data?.photo as string | undefined,
+      });
+    });
     const playerPointsData = (matchPointsSnap.data() ?? {}) as Record<string, number>;
 
     const posLabels: Record<string, string> = {
@@ -111,13 +119,13 @@ export async function GET(
       const s = d.data();
       const pid = String(s.playerId ?? "");
       const player = playersMap.get(pid);
-      const pos = String((player as { position?: string })?.position ?? "");
+      const pos = String(player?.position ?? "");
       return {
         playerId: pid,
-        name: (player?.name as string) ?? "?",
-        number: safeNum((player as { number?: number })?.number),
+        name: player?.name ?? "?",
+        number: safeNum(player?.number),
         position: (posLabels[pos] ?? pos) || "?",
-        photo: (player?.photo as string) || undefined,
+        photo: player?.photo || undefined,
         goals: safeNum(s.goals),
         assists: safeNum(s.assists),
         yellowCards: safeNum(s.yellowCards),

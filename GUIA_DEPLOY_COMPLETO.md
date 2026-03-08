@@ -57,16 +57,21 @@ Na tela de configuração do projeto, em **Environment Variables**, adicione **u
 | `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID` | Copie do seu `.env.local` |
 | `NEXT_PUBLIC_FIREBASE_APP_ID` | Copie do seu `.env.local` |
 | `API_FOOTBALL_KEY` | Copie do seu `.env.local` |
-| `FIREBASE_SERVICE_ACCOUNT` | Veja instrução abaixo |
+| `FIREBASE_SERVICE_ACCOUNT_BASE64` | Veja instrução abaixo (use Base64 para evitar erro na Vercel) |
 
-**Para `FIREBASE_SERVICE_ACCOUNT`:**
+**Para `FIREBASE_SERVICE_ACCOUNT_BASE64` (recomendado na Vercel):**
 
-1. Abra o arquivo `service-account.json` na raiz do projeto (no Bloco de Notas ou VS Code)
-2. Selecione **todo** o conteúdo (Ctrl+A)
-3. Copie (Ctrl+C)
-4. Cole como valor da variável na Vercel
-5. O JSON deve ficar em **uma linha só** — a Vercel aceita assim
-6. Marque a variável como **Sensitive** (proteção extra)
+1. No terminal, na pasta do projeto, rode:
+   ```bash
+   node -e "console.log(require('fs').readFileSync('service-account.json').toString('base64'))"
+   ```
+2. Copie **toda** a saída (uma longa string de letras, números, + e /)
+3. Na Vercel, crie a variável `FIREBASE_SERVICE_ACCOUNT_BASE64` e cole esse valor
+4. Marque como **Sensitive**
+
+**Alternativa** — se preferir `FIREBASE_SERVICE_ACCOUNT` (JSON direto):
+- Cole o conteúdo do `service-account.json` em **uma linha só** (sem quebras)
+- A Vercel às vezes rejeita — nesse caso use o Base64 acima
 
 ### 2.3 Deploy
 
