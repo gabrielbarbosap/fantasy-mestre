@@ -1,13 +1,36 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Jogadores (API-Football)
+
+Os jogadores reais do Santa Cruz são sincronizados da [API-Football](https://www.api-football.com/documentation-v3).
+
+**Via interface:** Faça login e acesse **Sync** na navbar → clique em "Sincronizar".
+
+**Via terminal:**
+```bash
+npm run sync-players
+```
+
+Configure `API_FOOTBALL_KEY` no `.env.local` (chave em api-football.com).
+
+## Conta de serviço (estatísticas)
+
+Para lançar estatísticas das partidas, é necessário a **conta de serviço** do Firebase (bypassa regras de segurança no servidor):
+
+1. [Firebase Console](https://console.firebase.google.com) → seu projeto → **Configurações** (ícone de engrenagem)
+2. **Contas de serviço** → **Gerar nova chave privada**
+3. Salve o JSON como `service-account.json` na raiz do projeto
+4. O `.env.local` já tem `GOOGLE_APPLICATION_CREDENTIALS=./service-account.json`
+
+O arquivo `service-account.json` está no `.gitignore` — **nunca faça commit dele**.
+
 ## Dados iniciais (seed)
 
-Para popular o Firestore com jogadores e partidas de exemplo:
+Para popular partidas de exemplo:
 
 ```bash
 npm run seed
 ```
-*As regras do Firestore precisam permitir escrita. Configure em Firebase Console → Firestore → Regras.*
 
 Copie o conteúdo de `firestore.rules` para o Firebase Console.
 

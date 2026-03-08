@@ -5,12 +5,15 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "deploy": "firebase deploy",
     "start": "next start",
     "lint": "eslint",
-    "seed": "npx tsx scripts/seed.ts"
+    "seed": "npx tsx scripts/seed.ts",
+    "sync-players": "npx tsx scripts/sync-players.ts"
   },
   "dependencies": {
     "firebase": "^12.10.0",
+    "firebase-admin": "^13.7.0",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3",
