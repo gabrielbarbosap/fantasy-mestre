@@ -126,7 +126,7 @@ export default function LigasPage() {
     <div className="mx-auto max-w-4xl px-4 py-8">
       <h1 className="mb-6 text-2xl font-bold text-blue-900">Ligas</h1>
 
-      <div className="mb-6 flex gap-2 border-b border-blue-200">
+      <div className="mb-6 flex flex-wrap gap-2 border-b border-blue-200">
         <button
           onClick={() => setTab("minha")}
           className={`border-b-2 px-4 py-2 text-sm font-medium ${

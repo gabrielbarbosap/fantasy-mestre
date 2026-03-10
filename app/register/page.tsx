@@ -73,7 +73,7 @@ export default function RegisterPage() {
 
   return (
     <div className="flex min-h-[80vh] items-center justify-center px-4">
-      <div className="w-full max-w-md rounded-xl border border-blue-200 bg-white p-8 shadow-lg">
+      <div className="w-full max-w-md rounded-xl border border-blue-200 bg-white p-6 shadow-lg sm:p-8">
         <h1 className="mb-6 text-2xl font-bold text-blue-900">Criar conta</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (

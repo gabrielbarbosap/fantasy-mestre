@@ -50,7 +50,7 @@ export default function HomePage() {
           Nenhum jogador cadastrado. Execute <code className="rounded bg-blue-100 px-2 py-0.5 text-blue-800">npm run seed</code> para popular o banco.
         </p>
       ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5">
           {players
             .filter((p) => p.active !== false)
             .sort((a, b) => {

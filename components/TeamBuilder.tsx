@@ -182,7 +182,7 @@ export function TeamBuilder({
           <h3 className="mb-4 text-sm font-semibold uppercase text-blue-600">
             {ZONE_LABELS[zone]}
           </h3>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5">
             {byZone(zone).map((player) => (
               <PlayerCard
                 key={player.playerId}

@@ -26,20 +26,14 @@ export function RankingTable({ entries, loading }: RankingTableProps) {
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-blue-200">
-      <table className="w-full">
+    <div className="overflow-x-auto rounded-lg border border-blue-200">
+      <table className="w-full min-w-[320px]">
         <thead>
           <tr className="border-b border-blue-200 bg-blue-50">
-            <th className="px-6 py-4 text-left text-sm font-semibold text-blue-900">
-              #
-            </th>
-            <th className="px-6 py-4 text-left text-sm font-semibold text-blue-900">
-              Nome
-            </th>
-            <th className="px-6 py-4 text-left text-sm font-semibold text-blue-900">
-              Time
-            </th>
-            <th className="px-6 py-4 text-right text-sm font-semibold text-blue-900">
+            <th className="px-3 py-3 text-left text-sm font-semibold text-blue-900 sm:px-6 sm:py-4">#</th>
+            <th className="px-3 py-3 text-left text-sm font-semibold text-blue-900 sm:px-6 sm:py-4">Nome</th>
+            <th className="hidden px-3 py-3 text-left text-sm font-semibold text-blue-900 sm:table-cell sm:px-6 sm:py-4">Time</th>
+            <th className="px-3 py-3 text-right text-sm font-semibold text-blue-900 sm:px-6 sm:py-4">
               Pontuação geral
             </th>
           </tr>
@@ -50,7 +44,7 @@ export function RankingTable({ entries, loading }: RankingTableProps) {
               key={entry.userId}
               className="border-b border-blue-100 last:border-0 hover:bg-blue-50"
             >
-              <td className="px-6 py-4">
+              <td className="px-3 py-3 sm:px-6 sm:py-4">
                 <span
                   className={`inline-flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium ${
                     index === 0
@@ -65,8 +59,8 @@ export function RankingTable({ entries, loading }: RankingTableProps) {
                   {index + 1}
                 </span>
               </td>
-              <td className="px-6 py-4">
-                <div className="flex items-center gap-3">
+              <td className="px-3 py-3 sm:px-6 sm:py-4">
+                <div className="flex items-center gap-2 sm:gap-3">
                   <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border border-blue-200 bg-blue-50">
                     {entry.photoURL ? (
                       <Image
@@ -83,11 +77,11 @@ export function RankingTable({ entries, loading }: RankingTableProps) {
                       </span>
                     )}
                   </div>
-                  <span className="font-medium text-blue-900">{entry.name}</span>
+                  <span className="max-w-[120px] truncate font-medium text-blue-900 sm:max-w-none">{entry.name}</span>
                 </div>
               </td>
-              <td className="px-6 py-4 text-blue-700">{entry.teamName}</td>
-              <td className="px-6 py-4 text-right font-semibold text-blue-900">
+              <td className="hidden px-3 py-3 text-blue-700 sm:table-cell sm:px-6 sm:py-4">{entry.teamName}</td>
+              <td className="px-3 py-3 text-right font-semibold text-blue-900 sm:px-6 sm:py-4">
                 {entry.points}
               </td>
             </tr>

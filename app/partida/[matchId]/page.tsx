@@ -110,7 +110,7 @@ export default function PartidaDetalhesPage() {
       </Link>
 
       <div className="mb-8 rounded-xl border border-blue-200 bg-white p-6 shadow-sm">
-        <h1 className="mb-1 text-2xl font-bold text-blue-900">
+        <h1 className="mb-1 text-xl font-bold text-blue-900 sm:text-2xl">
           {HOME_TEAM} x {details.opponent}
           {details.status === "finished" && (
             <span className="ml-3 font-normal text-blue-700">
@@ -152,8 +152,8 @@ export default function PartidaDetalhesPage() {
           </p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-blue-200">
-          <table className="w-full">
+        <div className="overflow-x-auto rounded-xl border border-blue-200">
+          <table className="w-full min-w-[300px]">
             <thead>
               <tr className="border-b border-blue-200 bg-blue-50">
                 <th className="px-6 py-4 text-left text-sm font-semibold text-blue-900">
@@ -225,7 +225,7 @@ export default function PartidaDetalhesPage() {
             Estatísticas dos jogadores
           </h2>
           <div className="overflow-x-auto rounded-xl border border-blue-200">
-            <table className="w-full min-w-[640px]">
+            <table className="w-full min-w-[560px]">
               <thead>
                 <tr className="border-b border-blue-200 bg-blue-50">
                   <th className="px-4 py-3 text-left text-xs font-semibold text-blue-900">

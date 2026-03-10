@@ -307,7 +307,7 @@ export default function PartidaAdminPage() {
                 Marque com checkboxes o que aconteceu com cada jogador. Só quem entrou em campo precisa estar marcado.
               </p>
               <div className="mb-4 overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full min-w-[600px] text-sm">
                   <thead>
                     <tr className="border-b border-blue-200 bg-blue-50">
                       <th className="px-2 py-2 text-left">Jogador</th>

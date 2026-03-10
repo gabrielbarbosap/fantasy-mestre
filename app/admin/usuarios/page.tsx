@@ -68,7 +68,7 @@ export default function AdminUsuariosPage() {
       {loading ? (
         <p className="text-blue-600">Carregando...</p>
       ) : (
-        <div className="overflow-hidden rounded-lg border border-blue-200">
+        <div className="overflow-x-auto rounded-lg border border-blue-200">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-blue-200 bg-blue-50">

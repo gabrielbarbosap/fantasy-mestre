@@ -89,7 +89,7 @@ export default function PerfilPage() {
   if (authLoading || !isAuthenticated) return null;
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8">
+    <div className="mx-auto max-w-2xl px-4 py-6 sm:py-8">
       <Link
         href="/dashboard"
         className="mb-6 inline-flex items-center text-sm text-blue-600 transition-colors hover:text-blue-800"

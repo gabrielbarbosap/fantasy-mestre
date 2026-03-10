@@ -133,7 +133,7 @@ export default function MeuTimePage() {
           <h2 className="mb-4 text-lg font-semibold text-blue-900">
             Jogadores
           </h2>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5">
             {players.map((player) => (
               <PlayerCard key={player.playerId} player={player} displayOnly />
             ))}

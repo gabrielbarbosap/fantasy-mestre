@@ -43,7 +43,7 @@ export default function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
-      <div className="mb-8 flex items-center gap-4">
+      <div className="mb-6 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-center sm:gap-4">
         <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full border-2 border-blue-200 bg-blue-50">
           {profile?.photoURL ? (
             <Image
@@ -60,7 +60,7 @@ export default function DashboardPage() {
             </span>
           )}
         </div>
-        <h1 className="text-2xl font-bold text-blue-900">
+        <h1 className="text-xl font-bold text-blue-900 sm:text-2xl">
           Olá, {profile?.name ?? user?.email?.split("@")[0]}!
         </h1>
       </div>
@@ -106,7 +106,7 @@ export default function DashboardPage() {
         </div>
       )}
 
-      <div className="grid gap-6 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
         <Link
           href="/meu-time"
           className="flex flex-col rounded-xl border border-blue-200 bg-white p-6 shadow-sm transition-colors hover:border-blue-300 hover:shadow-md"
