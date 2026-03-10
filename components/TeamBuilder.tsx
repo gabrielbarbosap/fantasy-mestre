@@ -28,13 +28,17 @@ function getZone(pos: PlayerPosition): Zone {
 }
 
 export function TeamBuilder({
+  clubId = "santa-cruz",
   initialSelected = {},
+  initialPlacar = { casa: 0, visitante: 0 },
   onSave,
   loading = false,
   disabled = false,
 }: {
+  clubId?: string;
   initialSelected?: Record<string, boolean>;
-  onSave: (players: Record<string, boolean>) => Promise<void>;
+  initialPlacar?: { casa: number; visitante: number };
+  onSave: (players: Record<string, boolean>, placar?: { casa: number; visitante: number }) => Promise<void>;
   loading?: boolean;
   disabled?: boolean;
 }) {
@@ -42,13 +46,20 @@ export function TeamBuilder({
   const [selected, setSelected] = useState<Record<string, boolean>>(
     initialSelected
   );
+  const [placarCasa, setPlacarCasa] = useState(initialPlacar.casa);
+  const [placarVisitante, setPlacarVisitante] = useState(initialPlacar.visitante);
   const [loadingPlayers, setLoadingPlayers] = useState(true);
 
   useEffect(() => {
-    fetchAllPlayers()
+    fetchAllPlayers(clubId)
       .then(setPlayers)
       .finally(() => setLoadingPlayers(false));
-  }, []);
+  }, [clubId]);
+
+  useEffect(() => {
+    setPlacarCasa(initialPlacar.casa);
+    setPlacarVisitante(initialPlacar.visitante);
+  }, [initialPlacar.casa, initialPlacar.visitante]);
 
   const totalSelected = Object.keys(selected).length;
   const countByZone = (zone: Zone) =>
@@ -87,7 +98,7 @@ export function TeamBuilder({
 
   const handleSave = async () => {
     if (!isValid) return;
-    await onSave(selected);
+    await onSave(selected, { casa: placarCasa, visitante: placarVisitante });
   };
 
   const activePlayers = players.filter((p) => p.active !== false);
@@ -104,11 +115,36 @@ export function TeamBuilder({
 
   return (
     <div className="space-y-8">
-      <div className="space-y-2">
+      <div className="space-y-4">
         <p className="text-blue-700">
           Selecione <strong>5 jogadores</strong>, com pelo menos 1 de cada
           faixa: defesa (goleiro ou zagueiro), meio-campo e ataque.
         </p>
+        <div className="flex flex-wrap items-center gap-4 rounded-lg border border-blue-200 bg-blue-50 p-4">
+          <span className="text-sm font-medium text-blue-800">Palpite do placar (acertar = +20 pts):</span>
+          <div className="flex items-center gap-2">
+            <input
+              type="number"
+              min={0}
+              max={99}
+              value={placarCasa}
+              onChange={(e) => setPlacarCasa(Number(e.target.value) || 0)}
+              disabled={disabled}
+              className="w-16 rounded border border-blue-300 px-2 py-1 text-center text-lg font-semibold"
+            />
+            <span className="text-blue-700">x</span>
+            <input
+              type="number"
+              min={0}
+              max={99}
+              value={placarVisitante}
+              onChange={(e) => setPlacarVisitante(Number(e.target.value) || 0)}
+              disabled={disabled}
+              className="w-16 rounded border border-blue-300 px-2 py-1 text-center text-lg font-semibold"
+            />
+            <span className="text-sm text-blue-600">Casa x Visitante</span>
+          </div>
+        </div>
         <div className="flex flex-wrap items-center gap-4">
           <span
             className={`font-medium ${

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import type { LeaderboardEntry } from "@/types/database";
 
 interface RankingTableProps {
@@ -64,8 +65,26 @@ export function RankingTable({ entries, loading }: RankingTableProps) {
                   {index + 1}
                 </span>
               </td>
-              <td className="px-6 py-4 font-medium text-blue-900">
-                {entry.name}
+              <td className="px-6 py-4">
+                <div className="flex items-center gap-3">
+                  <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border border-blue-200 bg-blue-50">
+                    {entry.photoURL ? (
+                      <Image
+                        src={entry.photoURL}
+                        alt={entry.name}
+                        fill
+                        className="object-cover"
+                        unoptimized
+                        sizes="40px"
+                      />
+                    ) : (
+                      <span className="flex h-full w-full items-center justify-center text-sm font-semibold text-blue-600">
+                        {entry.name?.charAt(0)?.toUpperCase() ?? "?"}
+                      </span>
+                    )}
+                  </div>
+                  <span className="font-medium text-blue-900">{entry.name}</span>
+                </div>
               </td>
               <td className="px-6 py-4 text-blue-700">{entry.teamName}</td>
               <td className="px-6 py-4 text-right font-semibold text-blue-900">

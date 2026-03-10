@@ -54,6 +54,8 @@ export default function PartidaAdminPage() {
   const [newDate, setNewDate] = useState("");
   const [creating, setCreating] = useState(false);
   const [finishing, setFinishing] = useState(false);
+  const [placarCasa, setPlacarCasa] = useState(0);
+  const [placarVisitante, setPlacarVisitante] = useState(0);
 
   useEffect(() => {
     if (authLoading) return;
@@ -102,10 +104,10 @@ export default function PartidaAdminPage() {
     if (!newOpponent.trim() || !newDate) return;
     setCreating(true);
     try {
-      const id = await createMatch(newOpponent, newDate, "scheduled");
+      const id = await createMatch(newOpponent, newDate, "scheduled", "santa-cruz");
       setMatches((prev) => [
         ...prev,
-        { matchId: id, opponent: newOpponent, date: newDate, status: "scheduled" },
+        { matchId: id, opponent: newOpponent, date: newDate, status: "scheduled", clubId: "santa-cruz" },
       ]);
       setNewOpponent("");
       setNewDate("");
@@ -196,6 +198,8 @@ export default function PartidaAdminPage() {
         body: JSON.stringify({
           matchId: selectedMatch.matchId,
           statsList,
+          homeGoals: placarCasa,
+          awayGoals: placarVisitante,
         }),
       });
       const data = await res.json();
@@ -441,6 +445,26 @@ export default function PartidaAdminPage() {
               <p className="mb-4 text-xs text-blue-600">
                 Gol (0–3) | Assist (0–2) | 90 min = jogou o jogo todo | Gols sof. = goleiro/defesa | CA = cartão amarelo | CV = cartão vermelho
               </p>
+              <div className="mb-6 flex items-center gap-4 rounded-lg border border-blue-200 bg-blue-50 p-4">
+                <span className="text-sm font-medium text-blue-800">Placar final da partida (Santa Cruz x {selectedMatch.opponent}):</span>
+                <input
+                  type="number"
+                  min={0}
+                  max={99}
+                  value={placarCasa}
+                  onChange={(e) => setPlacarCasa(Number(e.target.value) || 0)}
+                  className="w-16 rounded border border-blue-300 px-2 py-1 text-center text-lg font-semibold"
+                />
+                <span className="text-blue-700">x</span>
+                <input
+                  type="number"
+                  min={0}
+                  max={99}
+                  value={placarVisitante}
+                  onChange={(e) => setPlacarVisitante(Number(e.target.value) || 0)}
+                  className="w-16 rounded border border-blue-300 px-2 py-1 text-center text-lg font-semibold"
+                />
+              </div>
               <button
                 onClick={handleSave}
                 disabled={saving}

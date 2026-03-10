@@ -5,4 +5,5 @@ export interface Match {
   opponent: string;
   date: string;
   status: MatchStatus;
+  clubId?: string;
 }

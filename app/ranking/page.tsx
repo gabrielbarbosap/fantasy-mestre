@@ -12,6 +12,7 @@ export default function RankingPage() {
   useEffect(() => {
     fetchLeaderboard()
       .then(setEntries)
+      .catch(() => setEntries([]))
       .finally(() => setLoading(false));
   }, []);
 

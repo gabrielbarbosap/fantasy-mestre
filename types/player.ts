@@ -8,4 +8,5 @@ export interface Player {
   price: number;
   active: boolean;
   photo?: string;
+  clubId?: string;
 }

@@ -10,11 +10,16 @@ export interface UserPoints {
 export async function fetchUserPoints(userId: string): Promise<UserPoints> {
   const db = getFirestoreDb();
 
-  const [userSnap, umSnap, matches] = await Promise.all([
+  const [userSnap, umSnap, allMatches] = await Promise.all([
     getDoc(doc(db, "users", userId)),
     getDoc(doc(db, "user_match_points", userId)),
     fetchAllMatches(),
   ]);
+
+  const clubId = (userSnap.data()?.clubId as string) || "santa-cruz";
+  const matches = allMatches.filter(
+    (m) => (m.clubId ?? "santa-cruz") === clubId
+  );
 
   const totalPoints = (userSnap.data()?.totalPoints as number) ?? 0;
   const matchPoints = (umSnap.data() ?? {}) as Record<string, number>;

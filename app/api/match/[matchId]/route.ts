@@ -11,6 +11,7 @@ export interface MatchDetailsUser {
   name: string;
   points: number;
   position: number;
+  photoURL?: string;
 }
 
 export interface PlayerMatchStatsItem {
@@ -35,6 +36,8 @@ export interface MatchDetailsResponse {
   opponent: string;
   date: string;
   status: string;
+  homeGoals?: number;
+  awayGoals?: number;
   users: MatchDetailsUser[];
   playerStats: PlayerMatchStatsItem[];
 }
@@ -69,11 +72,16 @@ export async function GET(
     const opponent = String(matchData.opponent ?? "?");
     const date = String(matchData.date ?? "");
     const status = String(matchData.status ?? "finished");
+    const homeGoals = safeNum(matchData.homeGoals);
+    const awayGoals = safeNum(matchData.awayGoals);
 
-    const userNames = new Map<string, string>();
+    const userDataMap = new Map<string, { name: string; photoURL?: string }>();
     usersSnap.docs.forEach((d) => {
       const u = d.data();
-      userNames.set(d.id, String(u?.name ?? u?.email ?? "?").trim());
+      userDataMap.set(d.id, {
+        name: String(u?.name ?? u?.email ?? "?").trim(),
+        photoURL: (u?.photoURL as string) || undefined,
+      });
     });
 
     const users: MatchDetailsUser[] = [];
@@ -81,11 +89,13 @@ export async function GET(
       const data = d.data();
       const pts = safeNum(data[matchId]);
       if (pts > 0 || data[matchId] !== undefined) {
+        const ud = userDataMap.get(d.id);
         users.push({
           userId: d.id,
-          name: userNames.get(d.id) ?? "?",
+          name: ud?.name ?? "?",
           points: pts,
           position: 0,
+          photoURL: ud?.photoURL,
         });
       }
     });
@@ -145,6 +155,8 @@ export async function GET(
       opponent,
       date,
       status,
+      homeGoals,
+      awayGoals,
       users,
       playerStats,
     };

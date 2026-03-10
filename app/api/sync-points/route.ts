@@ -29,6 +29,7 @@ export async function POST() {
       const userDoc = usersSnap.docs.find((d) => d.id === userId);
       const userData = userDoc?.data() ?? {};
       const userName = String(userData?.name ?? userData?.email ?? "?").trim();
+      const photoURL = (userData?.photoURL as string) || undefined;
 
       const umDoc = umSnap.docs.find((d) => d.id === userId);
       const matchPoints = (umDoc?.data() ?? {}) as Record<string, number>;
@@ -48,6 +49,7 @@ export async function POST() {
         name: userName,
         points: total,
         teamName: `Time de ${userName}`,
+        photoURL: photoURL ?? null,
       });
       updated++;
     });

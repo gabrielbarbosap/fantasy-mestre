@@ -11,6 +11,7 @@ interface MatchDetailsUser {
   name: string;
   points: number;
   position: number;
+  photoURL?: string;
 }
 
 interface PlayerMatchStatsItem {
@@ -35,6 +36,8 @@ interface MatchDetails {
   opponent: string;
   date: string;
   status: string;
+  homeGoals?: number;
+  awayGoals?: number;
   users: MatchDetailsUser[];
   playerStats: PlayerMatchStatsItem[];
 }
@@ -108,6 +111,11 @@ export default function PartidaDetalhesPage() {
       <div className="mb-8 rounded-xl border border-blue-200 bg-white p-6 shadow-sm">
         <h1 className="mb-1 text-2xl font-bold text-blue-900">
           {HOME_TEAM} x {details.opponent}
+          {details.status === "finished" && (
+            <span className="ml-3 font-normal text-blue-700">
+              {details.homeGoals ?? 0} x {details.awayGoals ?? 0}
+            </span>
+          )}
         </h1>
         <p className="text-sm text-blue-600">
           {new Date(details.date).toLocaleString("pt-BR", {
@@ -179,8 +187,26 @@ export default function PartidaDetalhesPage() {
                       {u.position}
                     </span>
                   </td>
-                  <td className="px-6 py-4 font-medium text-blue-900">
-                    {u.name}
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border border-blue-200 bg-blue-50">
+                        {u.photoURL ? (
+                          <Image
+                            src={u.photoURL}
+                            alt={u.name}
+                            fill
+                            className="object-cover"
+                            unoptimized
+                            sizes="40px"
+                          />
+                        ) : (
+                          <span className="flex h-full w-full items-center justify-center text-sm font-semibold text-blue-600">
+                            {u.name?.charAt(0)?.toUpperCase() ?? "?"}
+                          </span>
+                        )}
+                      </div>
+                      <span className="font-medium text-blue-900">{u.name}</span>
+                    </div>
                   </td>
                   <td className="px-6 py-4 text-right font-semibold text-blue-900">
                     {u.points} pts
@@ -243,26 +269,14 @@ export default function PartidaDetalhesPage() {
                     className="border-b border-blue-100 last:border-0 hover:bg-blue-50"
                   >
                     <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-blue-100">
-                          {p.photo ? (
-                            <img
-                              src={p.photo}
-                              alt={p.name}
-                              className="h-full w-full object-cover"
-                            />
-                          ) : (
-                            <span className="flex h-full w-full items-center justify-center text-sm font-bold text-blue-600">
-                              {p.number || "?"}
-                            </span>
-                          )}
+                      <div className="flex items-center gap-2">
+                        <div className="flex flex-col items-center rounded border border-blue-200 bg-blue-50 px-2 py-1">
+                          <span className="text-[10px] font-bold uppercase text-blue-600">
+                            {p.position} #{p.number}
+                          </span>
+                          <span className="text-sm">{p.position === "GK" ? "🧤" : p.position === "DEF" ? "🛡" : p.position === "MID" ? "⚙" : "⚽"}</span>
                         </div>
-                        <div>
-                          <span className="font-medium text-blue-900">{p.name}</span>
-                          {p.number > 0 && (
-                            <span className="ml-1 text-blue-600">#{p.number}</span>
-                          )}
-                        </div>
+                        <span className="font-medium text-blue-900">{p.name}</span>
                       </div>
                     </td>
                     <td className="px-4 py-3 text-center text-sm text-blue-700">

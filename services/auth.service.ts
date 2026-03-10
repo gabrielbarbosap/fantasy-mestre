@@ -11,7 +11,9 @@ import type { User } from "@/types/user";
 export async function register(
   email: string,
   password: string,
-  name: string
+  name: string,
+  clubId: string,
+  photoURL?: string
 ): Promise<UserCredential> {
   const auth = getFirebaseAuth();
   const db = getFirestoreDb();
@@ -23,6 +25,8 @@ export async function register(
     name,
     email,
     teamId: "",
+    clubId: clubId || "santa-cruz",
+    photoURL: photoURL || undefined,
     totalPoints: 0,
     createdAt: new Date().toISOString(),
   };

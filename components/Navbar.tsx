@@ -1,12 +1,15 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import { logout } from "@/services/auth.service";
 import { isAdmin } from "@/lib/admin";
 
 export function Navbar() {
   const { user, isAuthenticated } = useAuth();
+  const { profile } = useUserProfile();
 
   const handleLogout = async () => {
     await logout();
@@ -42,8 +45,21 @@ export function Navbar() {
               <Link href="/ranking" className="text-blue-600 transition-colors hover:text-blue-800">
                 Ranking
               </Link>
+              <Link href="/perfil" className="text-blue-600 transition-colors hover:text-blue-800">
+                Perfil
+              </Link>
+              <Link href="/ligas" className="text-blue-600 transition-colors hover:text-blue-800">
+                Ligas
+              </Link>
               {isAdmin(user?.email) && (
                 <>
+                  <Link
+                    href="/admin/usuarios"
+                    className="text-blue-500 transition-colors hover:text-blue-700"
+                    title="Gerenciar usuários"
+                  >
+                    Usuários
+                  </Link>
                   <Link
                     href="/admin/sync-players"
                     className="text-blue-500 transition-colors hover:text-blue-700"
@@ -60,7 +76,25 @@ export function Navbar() {
                   </Link>
                 </>
               )}
-              <span className="text-sm text-blue-600">{user?.email}</span>
+              <div className="flex items-center gap-2">
+                <div className="relative h-8 w-8 overflow-hidden rounded-full border border-blue-300 bg-blue-50">
+                  {profile?.photoURL ? (
+                    <Image
+                      src={profile.photoURL}
+                      alt={profile.name}
+                      fill
+                      className="object-cover"
+                      unoptimized
+                      sizes="32px"
+                    />
+                  ) : (
+                    <span className="flex h-full w-full items-center justify-center text-sm text-blue-600">
+                      {profile?.name?.charAt(0)?.toUpperCase() ?? "?"}
+                    </span>
+                  )}
+                </div>
+                <span className="text-sm text-blue-600">{user?.email}</span>
+              </div>
               <button
                 onClick={handleLogout}
                 className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"

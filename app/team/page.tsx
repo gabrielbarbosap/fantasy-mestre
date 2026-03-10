@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserProfile } from "@/hooks/useUserProfile";
+import { MatchCountdown } from "@/components/MatchCountdown";
 import { TeamBuilder } from "@/components/TeamBuilder";
 import { fetchLineup, saveLineup } from "@/services/lineup.service";
 import {
@@ -15,6 +17,7 @@ import type { Match } from "@/types/match";
 
 export default function TeamPage() {
   const { user, loading: authLoading, isAuthenticated } = useAuth();
+  const { clubId } = useUserProfile();
   const router = useRouter();
   const [lineup, setLineup] = useState<MatchLineup | null>(null);
   const [match, setMatch] = useState<Match | null>(null);
@@ -31,7 +34,7 @@ export default function TeamPage() {
   useEffect(() => {
     if (!user?.uid) return;
 
-    fetchNextUpcomingMatch().then(async (nextMatch) => {
+    fetchNextUpcomingMatch(clubId).then(async (nextMatch) => {
       if (!nextMatch) {
         setMatch(null);
         setLineup(null);
@@ -48,20 +51,28 @@ export default function TeamPage() {
           matchId: nextMatch.matchId,
           userId: user.uid,
           players: {},
+          placarCasa: undefined,
+          placarVisitante: undefined,
           createdAt: new Date().toISOString(),
         }
       );
     }).finally(() => setLoadingTeam(false));
-  }, [user?.uid]);
+  }, [user?.uid, clubId]);
 
-  const handleSave = async (players: Record<string, boolean>) => {
+  const handleSave = async (
+    players: Record<string, boolean>,
+    placar?: { casa: number; visitante: number }
+  ) => {
     if (!user?.uid || !match) return;
     setSaving(true);
     try {
-      await saveLineup(match.matchId, user.uid, players);
+      await saveLineup(match.matchId, user.uid, players, placar);
       setLineup((prev) =>
-        prev ? { ...prev, players } : null
+        prev
+          ? { ...prev, players, placarCasa: placar?.casa, placarVisitante: placar?.visitante }
+          : null
       );
+      router.push("/meu-time");
     } finally {
       setSaving(false);
     }
@@ -84,13 +95,22 @@ export default function TeamPage() {
         </div>
       ) : (
         <>
-          <div className="mb-6 rounded-lg border border-blue-200 bg-white p-4 shadow-sm">
-            <p className="font-medium text-blue-900">
-              Partida: {HOME_TEAM} x {match.opponent}
-            </p>
-            <p className="text-sm text-blue-600">
-              {new Date(match.date).toLocaleString("pt-BR")}
-            </p>
+          <div className="mb-6 space-y-4">
+            <div className="rounded-lg border border-blue-200 bg-white p-4 shadow-sm">
+              <p className="font-medium text-blue-900">
+                Partida: {HOME_TEAM} x {match.opponent}
+              </p>
+              <p className="text-sm text-blue-600">
+                {new Date(match.date).toLocaleString("pt-BR", {
+                  timeZone: "America/Sao_Paulo",
+                  dateStyle: "long",
+                  timeStyle: "short",
+                })}
+              </p>
+            </div>
+            {!editLocked && (
+              <MatchCountdown matchDate={match.date} />
+            )}
           </div>
 
           {editLocked && (
@@ -108,7 +128,12 @@ export default function TeamPage() {
             </div>
           ) : (
             <TeamBuilder
+              clubId={clubId}
               initialSelected={lineup?.players ?? {}}
+              initialPlacar={{
+                casa: lineup?.placarCasa ?? 0,
+                visitante: lineup?.placarVisitante ?? 0,
+              }}
               onSave={handleSave}
               loading={saving}
               disabled={editLocked}

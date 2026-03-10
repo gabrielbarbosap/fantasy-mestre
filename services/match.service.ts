@@ -13,24 +13,34 @@ const HOME_TEAM = "Santa Cruz";
 
 export { HOME_TEAM };
 
+const DEFAULT_CLUB_ID = "santa-cruz";
+
 export async function createMatch(
   opponent: string,
   date: string,
-  status: Match["status"] = "scheduled"
+  status: Match["status"] = "scheduled",
+  clubId: string = DEFAULT_CLUB_ID
 ): Promise<string> {
   const db = getFirestoreDb();
   const ref = await addDoc(collection(db, "matches"), {
     opponent,
     date,
     status,
+    clubId,
   });
   return ref.id;
 }
 
-export async function fetchAllMatches(): Promise<Match[]> {
+export async function fetchAllMatches(clubId?: string): Promise<Match[]> {
   const db = getFirestoreDb();
   const snapshot = await getDocs(collection(db, "matches"));
-  return snapshot.docs.map((d) => ({ matchId: d.id, ...d.data() } as Match));
+  let matches = snapshot.docs.map((d) => ({ matchId: d.id, ...d.data() } as Match));
+  if (clubId) {
+    matches = matches.filter(
+      (m) => (m.clubId ?? DEFAULT_CLUB_ID) === clubId
+    );
+  }
+  return matches;
 }
 
 export async function fetchMatchById(matchId: string): Promise<Match | null> {
@@ -49,8 +59,8 @@ export async function updateMatchStatus(
 }
 
 /** Próxima partida agendada (para verificar bloqueio de edição) */
-export async function fetchNextUpcomingMatch(): Promise<Match | null> {
-  const matches = await fetchAllMatches();
+export async function fetchNextUpcomingMatch(clubId?: string): Promise<Match | null> {
+  const matches = await fetchAllMatches(clubId);
   const now = new Date();
   const upcoming = matches
     .filter((m) => m.status === "scheduled" && new Date(m.date) > now)

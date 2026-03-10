@@ -40,9 +40,10 @@ async function sync() {
   });
   const db = getFirestore(app);
 
+  const clubId = "santa-cruz";
   for (const p of players) {
     const { playerId, ...data } = p;
-    await setDoc(doc(db, "players", playerId), data);
+    await setDoc(doc(db, "players", playerId), { ...data, clubId });
   }
 
   console.log(`${players.length} jogadores sincronizados.`);

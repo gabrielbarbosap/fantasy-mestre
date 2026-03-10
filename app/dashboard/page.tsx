@@ -1,14 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import { fetchUserPoints } from "@/services/user-points.service";
 import { HOME_TEAM } from "@/services/match.service";
 
 export default function DashboardPage() {
   const { user, loading, isAuthenticated } = useAuth();
+  const { profile } = useUserProfile();
   const router = useRouter();
   const [points, setPoints] = useState<{
     totalPoints: number;
@@ -40,9 +43,27 @@ export default function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
-      <h1 className="mb-2 text-2xl font-bold text-blue-900">
-        Olá, {user?.email?.split("@")[0]}!
-      </h1>
+      <div className="mb-8 flex items-center gap-4">
+        <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full border-2 border-blue-200 bg-blue-50">
+          {profile?.photoURL ? (
+            <Image
+              src={profile.photoURL}
+              alt={profile.name}
+              fill
+              className="object-cover"
+              unoptimized
+              sizes="56px"
+            />
+          ) : (
+            <span className="flex h-full w-full items-center justify-center text-xl font-bold text-blue-600">
+              {profile?.name?.charAt(0)?.toUpperCase() ?? user?.email?.charAt(0)?.toUpperCase() ?? "?"}
+            </span>
+          )}
+        </div>
+        <h1 className="text-2xl font-bold text-blue-900">
+          Olá, {profile?.name ?? user?.email?.split("@")[0]}!
+        </h1>
+      </div>
       <p className="mb-8 text-blue-700">
         Bem-vindo ao Fantasy Club. Monte seu time e dispute o ranking.
       </p>
@@ -106,6 +127,15 @@ export default function DashboardPage() {
           </h2>
           <p className="text-sm text-blue-700">
             Escolha ou altere seus 5 jogadores.
+          </p>
+        </Link>
+        <Link
+          href="/perfil"
+          className="flex flex-col rounded-xl border border-blue-200 bg-white p-6 shadow-sm transition-colors hover:border-blue-300 hover:shadow-md"
+        >
+          <h2 className="mb-2 text-lg font-semibold text-blue-900">Perfil</h2>
+          <p className="text-sm text-blue-700">
+            Clube e dados da conta.
           </p>
         </Link>
         <Link

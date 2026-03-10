@@ -11,7 +11,7 @@ function safeNum(v: unknown): number {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { matchId, statsList } = body as {
+    const { matchId, statsList, homeGoals = 0, awayGoals = 0 } = body as {
       matchId: string;
       statsList: Array<{
         playerId: string;
@@ -24,6 +24,8 @@ export async function POST(req: NextRequest) {
         ownGoals: number;
         missedPenalties: number;
       }>;
+      homeGoals?: number;
+      awayGoals?: number;
     };
 
     if (!matchId || !Array.isArray(statsList) || statsList.length === 0) {
@@ -75,20 +77,32 @@ export async function POST(req: NextRequest) {
 
     await db.collection("match_points").doc(matchId).set(playerPoints);
 
+    const matchRef = db.collection("matches").doc(matchId);
+    await matchRef.set(
+      { homeGoals: safeNum(homeGoals), awayGoals: safeNum(awayGoals) },
+      { merge: true }
+    );
+
     const lineupsSnap = await db
       .collection("match_lineups")
       .where("matchId", "==", matchId)
       .get();
     const usersSnap = await db.collection("users").get();
 
-    const userNames: Record<string, string> = {};
+    const userDataMap = new Map<string, { name: string; photoURL?: string }>();
     usersSnap.docs.forEach((d) => {
       const u = d.data();
-      userNames[d.id] = String(u?.name ?? u?.email ?? "?").trim();
+      userDataMap.set(d.id, {
+        name: String(u?.name ?? u?.email ?? "?").trim(),
+        photoURL: (u?.photoURL as string) || undefined,
+      });
     });
 
     const userNewPoints: Record<string, number> = {};
     const userPrevPoints: Record<string, number> = {};
+
+    const homeG = safeNum(homeGoals);
+    const awayG = safeNum(awayGoals);
 
     lineupsSnap.docs.forEach((docSnap) => {
       const lineup = docSnap.data();
@@ -110,6 +124,13 @@ export async function POST(req: NextRequest) {
         newPts += playerPoints[pidStr] ?? 0;
         prevPts += prevPlayerPoints[pidStr] ?? 0;
       }
+
+      const predCasa = safeNum(lineup.placarCasa);
+      const predVisit = safeNum(lineup.placarVisitante);
+      if (predCasa === homeG && predVisit === awayG) {
+        newPts += 20;
+      }
+
       userNewPoints[userId] = newPts;
       userPrevPoints[userId] = prevPts;
     });
@@ -119,6 +140,7 @@ export async function POST(req: NextRequest) {
 
     for (const userId of Object.keys(userNewPoints)) {
       const delta = userNewPoints[userId] - (userPrevPoints[userId] ?? 0);
+      const ud = userDataMap.get(userId);
       const userRef = db.collection("users").doc(userId);
       const userSnap = await userRef.get();
       const currentTotal = safeNum(userSnap.data()?.totalPoints);
@@ -141,9 +163,10 @@ export async function POST(req: NextRequest) {
       const lbRef = db.collection("leaderboard").doc(userId);
       batch.set(lbRef, {
         userId,
-        name: userNames[userId] ?? "?",
+        name: ud?.name ?? "?",
         points: newTotal,
-        teamName: `Time de ${userNames[userId] ?? "?"}`,
+        teamName: `Time de ${ud?.name ?? "?"}`,
+        photoURL: ud?.photoURL ?? null,
       });
       usersUpdated++;
     }

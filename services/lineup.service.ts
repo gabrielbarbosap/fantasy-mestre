@@ -21,7 +21,8 @@ export async function fetchLineup(
 export async function saveLineup(
   matchId: string,
   userId: string,
-  players: Record<string, boolean>
+  players: Record<string, boolean>,
+  placar?: { casa: number; visitante: number }
 ): Promise<void> {
   const db = getFirestoreDb();
   const id = lineupDocId(matchId, userId);
@@ -31,6 +32,8 @@ export async function saveLineup(
     matchId,
     userId,
     players,
+    placarCasa: placar?.casa,
+    placarVisitante: placar?.visitante,
     createdAt: snap.exists()
       ? (snap.data()?.createdAt as string)
       : new Date().toISOString(),

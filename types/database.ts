@@ -38,4 +38,5 @@ export interface LeaderboardEntry {
   name: string;
   points: number;
   teamName: string;
+  photoURL?: string;
 }
