@@ -178,7 +178,7 @@ export default function LigasPage() {
                 <h2 className="font-semibold text-blue-900">{league.name}</h2>
                 <p className="text-sm text-blue-600">Código: {league.code}</p>
               </div>
-              {league.ownerId === user?.uid && (league as League & { pendingRequests?: { userId: string; name: string }[] }).pendingRequests?.length > 0 && (
+              {user && league.ownerId === user.uid && ((league as League & { pendingRequests?: { userId: string; name: string }[] }).pendingRequests?.length ?? 0) > 0 && (
                 <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
                   <h3 className="mb-2 font-semibold text-amber-900">Solicitações pendentes</h3>
                   <ul className="space-y-2">
