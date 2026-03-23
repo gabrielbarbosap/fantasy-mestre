@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 
 export const dynamic = "force-dynamic";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -31,6 +32,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} min-h-screen antialiased`}
       >
+        <Script
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1985448689634167"
+          strategy="afterInteractive"
+          crossOrigin="anonymous"
+        />
         <Navbar />
         <main className="min-h-[calc(100vh-140px)] px-4 pb-20 sm:px-6 sm:pb-16">{children}</main>
         <Footer />
