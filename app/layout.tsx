@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Script from "next/script";
 
 export const dynamic = "force-dynamic";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -18,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Fantasy Club",
-  description: "Fantasy Football para o seu clube",
+  title: "Fantasy Club — Monte seu time e dispute o ranking",
+  description: "Fantasy Club é um jogo de futebol virtual onde você monta seu time, acumula pontos com base nas estatísticas das partidas e compete no ranking. Crie sua conta e participe.",
 };
 
 export default function RootLayout({
@@ -31,15 +30,15 @@ export default function RootLayout({
     <html lang="pt-BR">
       <head>
         <meta name="google-adsense-account" content="ca-pub-1985448689634167" />
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1985448689634167"
+          crossOrigin="anonymous"
+        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} min-h-screen antialiased`}
       >
-        <Script
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1985448689634167"
-          strategy="beforeInteractive"
-          crossOrigin="anonymous"
-        />
         <Navbar />
         <main className="min-h-[calc(100vh-140px)] px-4 pb-20 sm:px-6 sm:pb-16">{children}</main>
         <Footer />
