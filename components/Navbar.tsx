@@ -31,6 +31,7 @@ export function Navbar() {
       {isAdmin(user?.email) && (
         <>
           <Link href="/admin/usuarios" onClick={() => setMenuOpen(false)} className={adminLinkClass} title="Usuários">Usuários</Link>
+          <Link href="/admin/premium-solicitacoes" onClick={() => setMenuOpen(false)} className={adminLinkClass} title="Solicitações Premium">Premium</Link>
           <Link href="/admin/sync-players" onClick={() => setMenuOpen(false)} className={adminLinkClass} title="Sync">Sync</Link>
           <Link href="/admin/partida" onClick={() => setMenuOpen(false)} className={adminLinkClass} title="Partida">Partida</Link>
         </>

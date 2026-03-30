@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminFirestore } from "@/lib/firebase-admin";
 import { calculatePlayerPoints } from "@/lib/scoring";
+import { SCORING_RULES } from "@/types/database";
 import type { Player } from "@/types/player";
 
 function safeNum(v: unknown): number {
@@ -128,7 +129,7 @@ export async function POST(req: NextRequest) {
       const predCasa = safeNum(lineup.placarCasa);
       const predVisit = safeNum(lineup.placarVisitante);
       if (predCasa === homeG && predVisit === awayG) {
-        newPts += 20;
+        newPts += SCORING_RULES.correctScore;
       }
 
       userNewPoints[userId] = newPts;

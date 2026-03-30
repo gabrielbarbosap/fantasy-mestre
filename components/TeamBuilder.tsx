@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { PlayerCard } from "./PlayerCard";
+import { Shimmer } from "./Shimmer";
 import { fetchAllPlayers } from "@/services/player.service";
+import { SCORING_RULES } from "@/types/database";
 import type { Player } from "@/types/player";
 import type { PlayerPosition } from "@/types/player";
 
@@ -107,8 +109,13 @@ export function TeamBuilder({
 
   if (loadingPlayers) {
     return (
-      <div className="flex justify-center py-12">
-        <span className="text-blue-600">Carregando jogadores...</span>
+      <div className="space-y-4">
+        <Shimmer className="h-8 w-48 rounded" />
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
+            <Shimmer key={i} className="h-32 rounded-lg" />
+          ))}
+        </div>
       </div>
     );
   }
@@ -121,7 +128,7 @@ export function TeamBuilder({
           faixa: defesa (goleiro ou zagueiro), meio-campo e ataque.
         </p>
         <div className="flex flex-wrap items-center gap-4 rounded-lg border border-blue-200 bg-blue-50 p-4">
-          <span className="text-sm font-medium text-blue-800">Palpite do placar (acertar = +20 pts):</span>
+          <span className="text-sm font-medium text-blue-800">Palpite do placar (acertar = +{SCORING_RULES.correctScore} pts):</span>
           <div className="flex items-center gap-2">
             <input
               type="number"

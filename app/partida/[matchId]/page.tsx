@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { Shimmer } from "@/components/Shimmer";
 import { useAuth } from "@/hooks/useAuth";
 import { HOME_TEAM } from "@/services/match.service";
 
@@ -76,10 +77,10 @@ export default function PartidaDetalhesPage() {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-4xl px-4 py-8">
-        <div className="flex justify-center py-16">
-          <span className="text-blue-600">Carregando detalhes da partida...</span>
-        </div>
+      <div className="mx-auto max-w-4xl space-y-6 px-4 py-8">
+        <Shimmer className="h-10 w-72 rounded-lg" />
+        <Shimmer className="h-64 w-full rounded-xl" />
+        <Shimmer className="h-48 w-full rounded-xl" />
       </div>
     );
   }

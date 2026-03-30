@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { MatchCountdown } from "@/components/MatchCountdown";
 import { TeamBuilder } from "@/components/TeamBuilder";
+import { Shimmer } from "@/components/Shimmer";
 import { fetchLineup, saveLineup } from "@/services/lineup.service";
 import {
   fetchNextUpcomingMatch,
@@ -123,8 +124,13 @@ export default function TeamPage() {
           )}
 
           {loadingTeam ? (
-            <div className="flex justify-center py-12">
-              <span className="text-blue-600">Carregando...</span>
+            <div className="space-y-6">
+              <Shimmer className="h-12 w-64 rounded-lg" />
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                  <Shimmer key={i} className="h-36 rounded-xl" />
+                ))}
+              </div>
             </div>
           ) : (
             <TeamBuilder

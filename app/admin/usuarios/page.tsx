@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { isAdmin } from "@/lib/admin";
+import { TableShimmer } from "@/components/Shimmer";
 
 interface UserRow {
   userId: string;
@@ -66,7 +67,7 @@ export default function AdminUsuariosPage() {
       </p>
 
       {loading ? (
-        <p className="text-blue-600">Carregando...</p>
+        <TableShimmer rows={8} />
       ) : (
         <div className="overflow-x-auto rounded-lg border border-blue-200">
           <table className="w-full text-sm">

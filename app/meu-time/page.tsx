@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { MatchCountdown } from "@/components/MatchCountdown";
 import { PlayerCard } from "@/components/PlayerCard";
+import { Shimmer } from "@/components/Shimmer";
 import { fetchLineup } from "@/services/lineup.service";
 import { fetchAllPlayers } from "@/services/player.service";
 import { fetchNextUpcomingMatch, isTeamEditLocked } from "@/services/match.service";
@@ -101,8 +102,13 @@ export default function MeuTimePage() {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-16">
-          <span className="text-blue-600">Carregando...</span>
+        <div className="space-y-6">
+          <Shimmer className="h-12 w-64 rounded-lg" />
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Shimmer key={i} className="h-32 rounded-xl" />
+            ))}
+          </div>
         </div>
       ) : !match ? (
         <div className="rounded-lg border border-blue-200 bg-blue-50 p-12 text-center">

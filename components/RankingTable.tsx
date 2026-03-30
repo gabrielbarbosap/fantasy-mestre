@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import type { LeaderboardEntry } from "@/types/database";
+import { RankingTableShimmer } from "@/components/Shimmer";
 
 interface RankingTableProps {
   entries: LeaderboardEntry[];
@@ -10,11 +11,7 @@ interface RankingTableProps {
 
 export function RankingTable({ entries, loading }: RankingTableProps) {
   if (loading) {
-    return (
-      <div className="flex justify-center py-12">
-        <span className="text-blue-600">Carregando ranking...</span>
-      </div>
-    );
+    return <RankingTableShimmer />;
   }
 
   if (entries.length === 0) {

@@ -25,6 +25,8 @@ export const SCORING_RULES = {
   goalConceded: -1, // GK e DEF
   ownGoal: -6,
   missedPenalty: -4,
+  /** Acertar o placar da partida */
+  correctScore: 20,
 } as const;
 
 // match_points: { matchId: { playerId: number } }

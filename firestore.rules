@@ -54,5 +54,11 @@ service cloud.firestore {
       allow create: if request.auth != null;
       allow update, delete: if request.auth != null;
     }
+
+    // premium_requests - usuário pode criar/atualizar apenas seu próprio pedido
+    match /premium_requests/{userId} {
+      allow create, update: if request.auth != null && request.auth.uid == userId;
+      allow read, delete: if false;
+    }
   }
 }

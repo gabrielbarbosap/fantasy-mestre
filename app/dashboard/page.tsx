@@ -8,15 +8,33 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { fetchUserPoints } from "@/services/user-points.service";
 import { HOME_TEAM } from "@/services/match.service";
+import { SCORING_RULES } from "@/types/database";
+import { DashboardShimmer } from "@/components/Shimmer";
+
+const POS: Record<string, string> = { GK: "GOL", DEF: "DEF", MID: "MID", ATT: "ATA" };
+
+interface TopPickedPlayer {
+  playerId: string;
+  name: string;
+  position: string;
+  number: number;
+  count: number;
+}
+
+interface MostPickedData {
+  match: { matchId: string; opponent: string; date: string } | null;
+  topPicked: TopPickedPlayer[];
+}
 
 export default function DashboardPage() {
   const { user, loading, isAuthenticated } = useAuth();
-  const { profile } = useUserProfile();
+  const { profile, clubId } = useUserProfile();
   const router = useRouter();
   const [points, setPoints] = useState<{
     totalPoints: number;
     pointsByMatch: Array<{ matchId: string; opponent: string; date: string; points: number }>;
   } | null>(null);
+  const [mostPicked, setMostPicked] = useState<MostPickedData | null>(null);
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -29,12 +47,15 @@ export default function DashboardPage() {
     fetchUserPoints(user.uid).then(setPoints);
   }, [user?.uid]);
 
+  useEffect(() => {
+    fetch(`/api/most-picked?clubId=${clubId ?? ""}`)
+      .then((res) => res.json())
+      .then((data: MostPickedData) => setMostPicked(data))
+      .catch(() => setMostPicked(null));
+  }, [clubId]);
+
   if (loading) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <span className="text-blue-600">Carregando...</span>
-      </div>
-    );
+    return <DashboardShimmer />;
   }
 
   if (!isAuthenticated) {
@@ -67,6 +88,63 @@ export default function DashboardPage() {
       <p className="mb-8 text-blue-700">
         Bem-vindo ao Fantasy Club. Monte seu time e dispute o ranking.
       </p>
+
+      {mostPicked?.match && (
+        <div className="mb-8 rounded-xl border border-blue-200 bg-white p-6 shadow-sm">
+          <h2 className="mb-2 text-lg font-semibold text-blue-900">
+            Rodada aberta — {HOME_TEAM} x {mostPicked.match.opponent}
+          </h2>
+          <p className="mb-4 text-sm text-blue-600">
+            {new Date(mostPicked.match.date).toLocaleDateString("pt-BR", {
+              weekday: "long",
+              day: "numeric",
+              month: "long",
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </p>
+          {mostPicked.topPicked.length > 0 ? (
+            <>
+              <p className="mb-3 text-sm font-medium text-blue-700">
+                Top 3 mais escalados
+              </p>
+              <div className="space-y-2">
+                {mostPicked.topPicked.map((p, i) => (
+                  <div
+                    key={p.playerId}
+                    className="flex items-center justify-between rounded-lg bg-blue-50 px-4 py-2.5"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-200 text-sm font-bold text-blue-800">
+                        {i + 1}
+                      </span>
+                      <span className="font-medium text-blue-900">
+                        {p.name}
+                      </span>
+                      <span className="text-sm text-blue-600">
+                        {POS[p.position] ?? p.position} #{p.number}
+                      </span>
+                    </div>
+                    <span className="text-sm font-medium text-blue-700">
+                      {p.count} {p.count === 1 ? "escalação" : "escalações"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <Link
+                href="/team"
+                className="mt-4 inline-block text-sm font-medium text-blue-600 hover:text-blue-800"
+              >
+                Montar meu time →
+              </Link>
+            </>
+          ) : (
+            <p className="text-sm text-blue-600">
+              Nenhuma escalação registrada ainda. Seja o primeiro a montar seu time!
+            </p>
+          )}
+        </div>
+      )}
 
       {points && (
         <div className="mb-8 rounded-xl border border-blue-200 bg-white p-6 shadow-sm">
@@ -147,6 +225,58 @@ export default function DashboardPage() {
             Veja a classificação geral dos jogadores.
           </p>
         </Link>
+      </div>
+
+      {/* Card de pontuação */}
+      <div className="mt-8 rounded-xl border border-blue-200 bg-white p-5 shadow-sm sm:p-6">
+        <h2 className="mb-3 text-lg font-semibold text-blue-900">
+          Como funciona a pontuação
+        </h2>
+        <p className="mb-4 text-sm text-blue-700">
+          Seus jogadores somam ou perdem pontos conforme as estatísticas nas partidas reais:
+        </p>
+        <div className="grid gap-2 text-sm sm:grid-cols-2">
+          <div className="flex justify-between rounded-lg bg-green-50 px-3 py-2 text-blue-800">
+            <span>Gol</span>
+            <span className="font-medium text-green-700">+{SCORING_RULES.goal}</span>
+          </div>
+          <div className="flex justify-between rounded-lg bg-green-50 px-3 py-2 text-blue-800">
+            <span>Assistência</span>
+            <span className="font-medium text-green-700">+{SCORING_RULES.assist}</span>
+          </div>
+          <div className="flex justify-between rounded-lg bg-green-50 px-3 py-2 text-blue-800">
+            <span>Acertar o placar</span>
+            <span className="font-medium text-green-700">+{SCORING_RULES.correctScore}</span>
+          </div>
+          <div className="flex justify-between rounded-lg bg-green-50 px-3 py-2 text-blue-800">
+            <span>Jogou 90 min</span>
+            <span className="font-medium text-green-700">+{SCORING_RULES.play90Minutes}</span>
+          </div>
+          <div className="flex justify-between rounded-lg bg-green-50 px-3 py-2 text-blue-800">
+            <span>Clean sheet (GOL/DEF)</span>
+            <span className="font-medium text-green-700">+{SCORING_RULES.cleanSheet}</span>
+          </div>
+          <div className="flex justify-between rounded-lg bg-red-50 px-3 py-2 text-blue-800">
+            <span>Cartão amarelo</span>
+            <span className="font-medium text-red-700">{SCORING_RULES.yellowCard}</span>
+          </div>
+          <div className="flex justify-between rounded-lg bg-red-50 px-3 py-2 text-blue-800">
+            <span>Gol sofrido (GOL/DEF)</span>
+            <span className="font-medium text-red-700">{SCORING_RULES.goalConceded}</span>
+          </div>
+          <div className="flex justify-between rounded-lg bg-red-50 px-3 py-2 text-blue-800">
+            <span>Cartão vermelho</span>
+            <span className="font-medium text-red-700">{SCORING_RULES.redCard}</span>
+          </div>
+          <div className="flex justify-between rounded-lg bg-red-50 px-3 py-2 text-blue-800">
+            <span>Pênalti perdido</span>
+            <span className="font-medium text-red-700">{SCORING_RULES.missedPenalty}</span>
+          </div>
+          <div className="flex justify-between rounded-lg bg-red-50 px-3 py-2 text-blue-800">
+            <span>Gol contra</span>
+            <span className="font-medium text-red-700">{SCORING_RULES.ownGoal}</span>
+          </div>
+        </div>
       </div>
     </div>
   );
