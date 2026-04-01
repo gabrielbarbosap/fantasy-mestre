@@ -3,6 +3,7 @@ import {
   deleteUser,
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
+  updatePassword,
   type UserCredential,
 } from "firebase/auth";
 import { getFirebaseAuth } from "@/lib/firebase";
@@ -105,4 +106,31 @@ export async function login(
 export async function logout(): Promise<void> {
   const auth = getFirebaseAuth();
   await firebaseSignOut(auth);
+}
+
+export async function changePassword(newPassword: string): Promise<void> {
+  if (newPassword.length < 6) {
+    throw new Error("A senha deve ter pelo menos 6 caracteres.");
+  }
+  if (!/[A-Z]/.test(newPassword)) {
+    throw new Error("A senha deve conter pelo menos uma letra maiúscula.");
+  }
+
+  const auth = getFirebaseAuth();
+  if (!auth.currentUser) {
+    throw new Error("Usuário não autenticado.");
+  }
+
+  try {
+    await updatePassword(auth.currentUser, newPassword);
+  } catch (error) {
+    const code = typeof error === "object" && error !== null && "code" in error
+      ? String((error as { code?: unknown }).code ?? "")
+      : "";
+
+    if (code === "auth/requires-recent-login") {
+      throw new Error("Por segurança, faça login novamente antes de trocar a senha.");
+    }
+    throw new Error("Não foi possível atualizar a senha. Tente novamente.");
+  }
 }

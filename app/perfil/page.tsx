@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { updateUserClub, updateUserPhoto } from "@/services/user.service";
+import { changePassword } from "@/services/auth.service";
 import { fileToBase64, validatePhoto } from "@/services/user-photo.service";
 import { CLUBS } from "@/types/club";
 
@@ -19,6 +20,7 @@ export default function PerfilPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [newPassword, setNewPassword] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -81,6 +83,25 @@ export default function PerfilPage() {
       setTimeout(() => setMessage(null), 3000);
     } catch {
       setMessage("Erro ao atualizar clube. Tente novamente.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (!newPassword.trim()) {
+      setMessage("Informe a nova senha.");
+      return;
+    }
+    setSaving(true);
+    setMessage(null);
+    try {
+      await changePassword(newPassword);
+      setMessage("Senha atualizada com sucesso!");
+      setNewPassword("");
+      setTimeout(() => setMessage(null), 3000);
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : "Erro ao atualizar senha.");
     } finally {
       setSaving(false);
     }
@@ -190,6 +211,33 @@ export default function PerfilPage() {
             {saving ? "Salvando..." : "Salvar clube"}
           </button>
         )}
+      </div>
+
+      <div className="mt-8 rounded-xl border border-blue-200 bg-white p-6 shadow-sm">
+        <label
+          htmlFor="new-password"
+          className="mb-2 block text-sm font-medium text-blue-800"
+        >
+          Nova senha
+        </label>
+        <input
+          id="new-password"
+          type="password"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+          className="mb-2 w-full rounded-lg border border-blue-300 px-4 py-2 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
+          placeholder="Digite sua nova senha"
+        />
+        <p className="mb-4 text-xs text-slate-500">
+          Mínimo 6 caracteres e pelo menos 1 letra maiúscula.
+        </p>
+        <button
+          onClick={handleChangePassword}
+          disabled={saving || !newPassword.trim()}
+          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
+        >
+          {saving ? "Salvando..." : "Trocar senha"}
+        </button>
       </div>
 
       {message && (
