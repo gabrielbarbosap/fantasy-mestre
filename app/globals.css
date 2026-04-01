@@ -1,11 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8fafc;
-  --foreground: #1e3a8a;
-  --primary: #2563eb;
-  --primary-hover: #1d4ed8;
-  --accent: #eab308;
+  --background: #050b16;
+  --foreground: #dbeafe;
+  --primary: #3b82f6;
+  --primary-hover: #60a5fa;
+  --accent: #facc15;
+}
+
+html,
+body {
+  color-scheme: dark;
+  background: #050b16 !important;
 }
 
 @theme inline {
@@ -21,6 +27,96 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Escala global de texto no tema dark */
+.text-blue-500,
+.text-blue-600,
+.text-blue-700,
+.text-blue-800,
+.text-blue-900 {
+  color: #bfdbfe;
+}
+
+/* Hovers em azul claro para destaque */
+.hover\:text-blue-500:hover,
+.hover\:text-blue-600:hover,
+.hover\:text-blue-700:hover,
+.hover\:text-blue-800:hover,
+.hover\:text-blue-900:hover {
+  color: #93c5fd;
+}
+
+/* Superfícies escuras globais */
+.bg-white {
+  background-color: #0b1220 !important;
+}
+
+.bg-slate-50 {
+  background-color: #050b16 !important;
+}
+
+.bg-slate-100 {
+  background-color: #0f172a !important;
+}
+
+.bg-blue-50 {
+  background-color: #0f172a !important;
+}
+
+.bg-blue-100 {
+  background-color: #111c31 !important;
+}
+
+.bg-emerald-50 {
+  background-color: #0b1f1a !important;
+}
+
+.bg-rose-50 {
+  background-color: #2a0f18 !important;
+}
+
+.bg-gradient-to-br.from-blue-50.to-white {
+  background-image: linear-gradient(to bottom right, #0f172a, #0b1220) !important;
+}
+
+/* Bordas no padrão dark */
+.border-slate-200,
+.border-blue-100,
+.border-blue-200,
+.border-blue-300 {
+  border-color: #1e293b !important;
+}
+
+/* Textos neutros no padrão dark */
+.text-slate-900 {
+  color: #f8fafc !important;
+}
+
+.text-slate-800 {
+  color: #e2e8f0 !important;
+}
+
+.text-slate-700,
+.text-slate-600,
+.text-slate-500 {
+  color: #94a3b8 !important;
+}
+
+.text-emerald-900 {
+  color: #86efac !important;
+}
+
+.text-rose-900 {
+  color: #fda4af !important;
+}
+
+/* Campos de formulário no padrão dark */
+input,
+select,
+textarea {
+  background-color: #0f172a;
+  color: #e2e8f0;
+}
+
 @keyframes shimmer {
   0% {
     background-position: -200% 0;
@@ -33,9 +129,9 @@ body {
 .animate-shimmer {
   background: linear-gradient(
     90deg,
-    rgb(226 232 240) 25%,
-    rgb(241 245 249) 50%,
-    rgb(226 232 240) 75%
+    rgb(30 41 59) 25%,
+    rgb(51 65 85) 50%,
+    rgb(30 41 59) 75%
   );
   background-size: 200% 100%;
   animation: shimmer 1.5s ease-in-out infinite;

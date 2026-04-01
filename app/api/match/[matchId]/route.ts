@@ -54,11 +54,12 @@ export async function GET(
 
     const db = getAdminFirestore();
 
-    const [matchSnap, umSnap, usersSnap, statsSnap, matchPointsSnap, playersSnap] =
+    const [matchSnap, umSnap, usersSnap, nicknamesSnap, statsSnap, matchPointsSnap, playersSnap] =
       await Promise.all([
         db.collection("matches").doc(matchId).get(),
         db.collection("user_match_points").get(),
         db.collection("users").get(),
+        db.collection("nicknames").get(),
         db.collection("player_match_stats").where("matchId", "==", matchId).get(),
         db.collection("match_points").doc(matchId).get(),
         db.collection("players").get(),
@@ -75,11 +76,24 @@ export async function GET(
     const homeGoals = safeNum(matchData.homeGoals);
     const awayGoals = safeNum(matchData.awayGoals);
 
-    const userDataMap = new Map<string, { name: string; photoURL?: string }>();
+    const nicknameByUserId = new Map<string, string>();
+    nicknamesSnap.docs.forEach((d) => {
+      const data = d.data();
+      const uid = String(data?.userId ?? data?.uid ?? d.id ?? "").trim();
+      const nickname = String(data?.nickname ?? "").trim();
+      if (uid && nickname && !nicknameByUserId.has(uid)) {
+        nicknameByUserId.set(uid, nickname);
+      }
+    });
+
+    const userDataMap = new Map<string, { displayName: string; photoURL?: string }>();
     usersSnap.docs.forEach((d) => {
       const u = d.data();
+      const nickname =
+        String(u?.nickname ?? "").trim() || nicknameByUserId.get(d.id) || "";
+      const fallbackName = String(u?.name ?? u?.email ?? "?").trim();
       userDataMap.set(d.id, {
-        name: String(u?.name ?? u?.email ?? "?").trim(),
+        displayName: nickname || fallbackName,
         photoURL: (u?.photoURL as string) || undefined,
       });
     });
@@ -92,7 +106,7 @@ export async function GET(
         const ud = userDataMap.get(d.id);
         users.push({
           userId: d.id,
-          name: ud?.name ?? "?",
+          name: ud?.displayName ?? "?",
           points: pts,
           position: 0,
           photoURL: ud?.photoURL,

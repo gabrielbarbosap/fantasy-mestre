@@ -12,6 +12,7 @@ export default function RegisterPage() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState("");
+  const [nickname, setNickname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -54,18 +55,23 @@ export default function RegisterPage() {
       setError("A senha deve ter pelo menos 6 caracteres.");
       return;
     }
+    if (!/[A-Z]/.test(password)) {
+      setError("A senha deve conter pelo menos uma letra maiúscula.");
+      return;
+    }
+    if (!photoFile) {
+      setError("A foto de perfil é obrigatória.");
+      return;
+    }
     setLoading(true);
     try {
-      let photoBase64: string | undefined;
-      if (photoFile) {
-        photoBase64 = await fileToBase64(photoFile);
-      }
-      await register(email, password, name, clubId, photoBase64);
+      const photoBase64 = await fileToBase64(photoFile);
+      await register(email, password, name, nickname, clubId, photoBase64);
 
       router.push("/dashboard");
       router.refresh();
     } catch (err) {
-      setError("Não foi possível criar a conta. Tente outro e-mail.");
+      setError(err instanceof Error ? err.message : "Não foi possível criar a conta. Tente outro e-mail.");
     } finally {
       setLoading(false);
     }
@@ -74,6 +80,18 @@ export default function RegisterPage() {
   return (
     <div className="flex min-h-[80vh] items-center justify-center px-4">
       <div className="w-full max-w-md rounded-xl border border-blue-200 bg-white p-6 shadow-lg sm:p-8">
+        <div className="mb-5 flex justify-center">
+          <div className="rounded-2xl border border-blue-200 bg-blue-50/40 p-2 shadow-md shadow-blue-200/60">
+            <Image
+              src="/logo.png"
+              alt="Bancada FC"
+              width={96}
+              height={96}
+              className="h-20 w-20 object-contain"
+              priority
+            />
+          </div>
+        </div>
         <h1 className="mb-6 text-2xl font-bold text-blue-900">Criar conta</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
@@ -99,6 +117,29 @@ export default function RegisterPage() {
           </div>
           <div>
             <label
+              htmlFor="nickname"
+              className="mb-1 block text-sm font-medium text-blue-800"
+            >
+              Nickname (único)
+            </label>
+            <input
+              id="nickname"
+              type="text"
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
+              required
+              minLength={3}
+              maxLength={20}
+              pattern="[A-Za-z0-9_]{3,20}"
+              title="Use 3 a 20 caracteres: letras, números ou _"
+              className="w-full rounded-lg border border-blue-300 px-4 py-2 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
+            />
+            <p className="mt-1 text-xs text-slate-500">
+              Use 3 a 20 caracteres: letras, números ou _
+            </p>
+          </div>
+          <div>
+            <label
               htmlFor="club"
               className="mb-1 block text-sm font-medium text-blue-800"
             >
@@ -120,8 +161,11 @@ export default function RegisterPage() {
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium text-blue-800">
-              Foto (opcional)
+              Foto (obrigatória)
             </label>
+            <p className="mb-2 text-xs text-slate-500">
+              Envie JPG, PNG ou WebP com até 5MB.
+            </p>
             <div className="flex items-center gap-4">
               <div className="relative h-16 w-16 overflow-hidden rounded-full border-2 border-blue-300 bg-blue-50">
                 {photoPreview ? (
@@ -145,6 +189,7 @@ export default function RegisterPage() {
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
                   onChange={handlePhotoChange}
+                  required={!photoFile}
                   className="text-sm text-blue-700 file:mr-2 file:rounded-lg file:border-0 file:bg-blue-100 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-blue-800 hover:file:bg-blue-200"
                 />
                 {photoFile && (
@@ -191,6 +236,9 @@ export default function RegisterPage() {
               minLength={6}
               className="w-full rounded-lg border border-blue-300 px-4 py-2 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
             />
+            <p className="mt-1 text-xs text-slate-500">
+              Mínimo 6 caracteres e pelo menos 1 letra maiúscula.
+            </p>
           </div>
           <div>
             <label

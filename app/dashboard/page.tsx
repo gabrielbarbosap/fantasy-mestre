@@ -12,6 +12,10 @@ import { SCORING_RULES } from "@/types/database";
 import { DashboardShimmer } from "@/components/Shimmer";
 
 const POS: Record<string, string> = { GK: "GOL", DEF: "DEF", MID: "MID", ATT: "ATA" };
+const POSITIVE_ROW_CLASS =
+  "flex justify-between rounded-lg border border-emerald-700/40 bg-emerald-950/50 px-3 py-2 text-emerald-100";
+const NEGATIVE_ROW_CLASS =
+  "flex justify-between rounded-lg border border-rose-700/40 bg-rose-950/50 px-3 py-2 text-rose-100";
 
 interface TopPickedPlayer {
   playerId: string;
@@ -232,49 +236,49 @@ export default function DashboardPage() {
         <h2 className="mb-3 text-lg font-semibold text-blue-900">
           Como funciona a pontuação
         </h2>
-        <p className="mb-4 text-sm text-blue-700">
+        <p className="mb-4 text-sm text-slate-200">
           Seus jogadores somam ou perdem pontos conforme as estatísticas nas partidas reais:
         </p>
         <div className="grid gap-2 text-sm sm:grid-cols-2">
-          <div className="flex justify-between rounded-lg bg-green-50 px-3 py-2 text-blue-800">
+          <div className={POSITIVE_ROW_CLASS}>
             <span>Gol</span>
-            <span className="font-medium text-green-700">+{SCORING_RULES.goal}</span>
+            <span className="font-semibold text-emerald-300">+{SCORING_RULES.goal}</span>
           </div>
-          <div className="flex justify-between rounded-lg bg-green-50 px-3 py-2 text-blue-800">
+          <div className={POSITIVE_ROW_CLASS}>
             <span>Assistência</span>
-            <span className="font-medium text-green-700">+{SCORING_RULES.assist}</span>
+            <span className="font-semibold text-emerald-300">+{SCORING_RULES.assist}</span>
           </div>
-          <div className="flex justify-between rounded-lg bg-green-50 px-3 py-2 text-blue-800">
+          <div className={POSITIVE_ROW_CLASS}>
             <span>Acertar o placar</span>
-            <span className="font-medium text-green-700">+{SCORING_RULES.correctScore}</span>
+            <span className="font-semibold text-emerald-300">+{SCORING_RULES.correctScore}</span>
           </div>
-          <div className="flex justify-between rounded-lg bg-green-50 px-3 py-2 text-blue-800">
+          <div className={POSITIVE_ROW_CLASS}>
             <span>Jogou 90 min</span>
-            <span className="font-medium text-green-700">+{SCORING_RULES.play90Minutes}</span>
+            <span className="font-semibold text-emerald-300">+{SCORING_RULES.play90Minutes}</span>
           </div>
-          <div className="flex justify-between rounded-lg bg-green-50 px-3 py-2 text-blue-800">
+          <div className={POSITIVE_ROW_CLASS}>
             <span>Clean sheet (GOL/DEF)</span>
-            <span className="font-medium text-green-700">+{SCORING_RULES.cleanSheet}</span>
+            <span className="font-semibold text-emerald-300">+{SCORING_RULES.cleanSheet}</span>
           </div>
-          <div className="flex justify-between rounded-lg bg-red-50 px-3 py-2 text-blue-800">
+          <div className={NEGATIVE_ROW_CLASS}>
             <span>Cartão amarelo</span>
-            <span className="font-medium text-red-700">{SCORING_RULES.yellowCard}</span>
+            <span className="font-semibold text-rose-300">{SCORING_RULES.yellowCard}</span>
           </div>
-          <div className="flex justify-between rounded-lg bg-red-50 px-3 py-2 text-blue-800">
+          <div className={NEGATIVE_ROW_CLASS}>
             <span>Gol sofrido (GOL/DEF)</span>
-            <span className="font-medium text-red-700">{SCORING_RULES.goalConceded}</span>
+            <span className="font-semibold text-rose-300">{SCORING_RULES.goalConceded}</span>
           </div>
-          <div className="flex justify-between rounded-lg bg-red-50 px-3 py-2 text-blue-800">
+          <div className={NEGATIVE_ROW_CLASS}>
             <span>Cartão vermelho</span>
-            <span className="font-medium text-red-700">{SCORING_RULES.redCard}</span>
+            <span className="font-semibold text-rose-300">{SCORING_RULES.redCard}</span>
           </div>
-          <div className="flex justify-between rounded-lg bg-red-50 px-3 py-2 text-blue-800">
+          <div className={NEGATIVE_ROW_CLASS}>
             <span>Pênalti perdido</span>
-            <span className="font-medium text-red-700">{SCORING_RULES.missedPenalty}</span>
+            <span className="font-semibold text-rose-300">{SCORING_RULES.missedPenalty}</span>
           </div>
-          <div className="flex justify-between rounded-lg bg-red-50 px-3 py-2 text-blue-800">
+          <div className={NEGATIVE_ROW_CLASS}>
             <span>Gol contra</span>
-            <span className="font-medium text-red-700">{SCORING_RULES.ownGoal}</span>
+            <span className="font-semibold text-rose-300">{SCORING_RULES.ownGoal}</span>
           </div>
         </div>
       </div>

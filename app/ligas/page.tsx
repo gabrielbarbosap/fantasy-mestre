@@ -56,7 +56,7 @@ export default function LigasPage() {
       .then(async (l) => {
         setLeague(l ?? null);
         if (l) {
-          const r = await fetch(`/api/leagues/ranking?leagueId=${l.leagueId}`);
+          const r = await fetch(`/api/leagues/ranking?leagueId=${l.leagueId}`, { cache: "no-store" });
           if (r.ok) setLeagueRanking(await r.json());
         }
       })
@@ -106,7 +106,7 @@ export default function LigasPage() {
       const l = await fetchLeagueById(league.leagueId);
       setLeague(l ?? null);
       if (l) {
-        const r = await fetch(`/api/leagues/ranking?leagueId=${l.leagueId}`);
+        const r = await fetch(`/api/leagues/ranking?leagueId=${l.leagueId}`, { cache: "no-store" });
         if (r.ok) setLeagueRanking(await r.json());
       }
     } finally {

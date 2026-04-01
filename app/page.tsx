@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { fetchAllPlayers, sortPlayersByDisplayOrder } from "@/services/player.service";
 import { useAuth } from "@/hooks/useAuth";
 import { SCORING_RULES } from "@/types/database";

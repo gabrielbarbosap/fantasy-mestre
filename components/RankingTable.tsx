@@ -39,7 +39,7 @@ export function RankingTable({ entries, loading }: RankingTableProps) {
           {entries.map((entry, index) => (
             <tr
               key={entry.userId}
-              className="border-b border-blue-100 last:border-0 hover:bg-blue-50"
+              className="border-b border-blue-100 last:border-0 hover:bg-white/5"
             >
               <td className="px-3 py-3 sm:px-6 sm:py-4">
                 <span

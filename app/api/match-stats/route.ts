@@ -90,11 +90,14 @@ export async function POST(req: NextRequest) {
       .get();
     const usersSnap = await db.collection("users").get();
 
-    const userDataMap = new Map<string, { name: string; photoURL?: string }>();
+    const userDataMap = new Map<string, { name: string; nickname?: string; photoURL?: string }>();
     usersSnap.docs.forEach((d) => {
       const u = d.data();
+      const name = String(u?.name ?? u?.email ?? "?").trim();
+      const nickname = String(u?.nickname ?? "").trim();
       userDataMap.set(d.id, {
-        name: String(u?.name ?? u?.email ?? "?").trim(),
+        name,
+        nickname: nickname || undefined,
         photoURL: (u?.photoURL as string) || undefined,
       });
     });
@@ -162,11 +165,12 @@ export async function POST(req: NextRequest) {
       batch.set(userMatchRef, umPlain);
 
       const lbRef = db.collection("leaderboard").doc(userId);
+      const displayName = ud?.nickname ?? ud?.name ?? "?";
       batch.set(lbRef, {
         userId,
-        name: ud?.name ?? "?",
+        name: displayName,
         points: newTotal,
-        teamName: `Time de ${ud?.name ?? "?"}`,
+        teamName: `Time de ${displayName}`,
         photoURL: ud?.photoURL ?? null,
       });
       usersUpdated++;

@@ -36,12 +36,29 @@ export async function GET(req: NextRequest) {
       })
       .sort((a, b) => b.points - a.points);
 
-    const usersSnap = await db.collection("users").get();
-    const userMap = new Map<string, { name: string; photoURL?: string }>();
+    const [usersSnap, nicknamesSnap] = await Promise.all([
+      db.collection("users").get(),
+      db.collection("nicknames").get(),
+    ]);
+    const nicknameByUserId = new Map<string, string>();
+    nicknamesSnap.docs.forEach((d) => {
+      const data = d.data();
+      const uid = String(data?.userId ?? data?.uid ?? d.id ?? "").trim();
+      const nickname = String(data?.nickname ?? "").trim();
+      if (uid && nickname && !nicknameByUserId.has(uid)) {
+        nicknameByUserId.set(uid, nickname);
+      }
+    });
+
+    const userMap = new Map<string, { name: string; nickname?: string; photoURL?: string }>();
     usersSnap.docs.forEach((doc) => {
       const u = doc.data();
+      const name = String(u?.name ?? u?.email ?? "?").trim();
+      const nickname =
+        String(u?.nickname ?? "").trim() || nicknameByUserId.get(doc.id) || "";
       userMap.set(doc.id, {
-        name: String(u?.name ?? u?.email ?? "?"),
+        name,
+        nickname: nickname || undefined,
         photoURL: (u?.photoURL as string) || undefined,
       });
     });
@@ -49,8 +66,10 @@ export async function GET(req: NextRequest) {
     entries.forEach((e) => {
       const u = userMap.get(e.userId);
       if (u) {
+        const displayName = u.nickname || u.name;
         if (!e.photoURL && u.photoURL) e.photoURL = u.photoURL;
-        if (e.name === "?") e.name = u.name;
+        e.name = displayName;
+        e.teamName = `Time de ${displayName}`;
       }
     });
 

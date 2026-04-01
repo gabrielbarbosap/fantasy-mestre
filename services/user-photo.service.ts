@@ -1,4 +1,4 @@
-const MAX_SIZE_MB = 2;
+const MAX_SIZE_MB = 5;
 const MAX_DIMENSION = 400; // mantém base64 menor para caber no Firestore (1MB)
 const JPEG_QUALITY = 0.8;
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];

@@ -143,7 +143,7 @@ export default function PartidaDetalhesPage() {
       </div>
 
       <h2 className="mb-4 text-lg font-semibold text-blue-900">
-        Classificação da partida
+        TOP 3 da rodada
       </h2>
 
       {details.users.length === 0 ? (
@@ -169,10 +169,10 @@ export default function PartidaDetalhesPage() {
               </tr>
             </thead>
             <tbody>
-              {details.users.map((u, index) => (
+              {details.users.slice(0, 3).map((u, index) => (
                 <tr
                   key={u.userId}
-                  className="border-b border-blue-100 last:border-0 hover:bg-blue-50"
+                  className="border-b border-blue-100 last:border-0 hover:bg-white/5"
                 >
                   <td className="px-6 py-4">
                     <span
@@ -268,13 +268,13 @@ export default function PartidaDetalhesPage() {
                 {details.playerStats.map((p) => (
                   <tr
                     key={p.playerId}
-                    className="border-b border-blue-100 last:border-0 hover:bg-blue-50"
+                    className="border-b border-blue-100 last:border-0 hover:bg-white/5"
                   >
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <div className="flex flex-col items-center rounded border border-blue-200 bg-blue-50 px-2 py-1">
                           <span className="text-[10px] font-bold uppercase text-blue-600">
-                            {p.position} #{p.number}
+                            #{p.number}
                           </span>
                           <span className="text-sm">{p.position === "GK" ? "🧤" : p.position === "DEF" ? "🛡" : p.position === "MID" ? "⚙" : "⚽"}</span>
                         </div>

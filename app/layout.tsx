@@ -19,6 +19,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Bancada FC — Edição Santa Cruz",
   description: "Bancada FC é o fantasy para torcedores do Santa Cruz: monte seu time, some pontos rodada a rodada e dispute o ranking com seus amigos.",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({

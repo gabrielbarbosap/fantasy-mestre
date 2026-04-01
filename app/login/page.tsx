@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { login } from "@/services/auth.service";
 
@@ -30,6 +31,18 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-[80vh] items-center justify-center px-4">
       <div className="w-full max-w-md rounded-xl border border-blue-200 bg-white p-8 shadow-lg">
+        <div className="mb-5 flex justify-center">
+          <div className="rounded-2xl border border-blue-200 bg-blue-50/40 p-2 shadow-md shadow-blue-200/60">
+            <Image
+              src="/logo.png"
+              alt="Bancada FC"
+              width={96}
+              height={96}
+              className="h-20 w-20 object-contain"
+              priority
+            />
+          </div>
+        </div>
         <h1 className="mb-6 text-2xl font-bold text-blue-900">Entrar</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (

@@ -14,33 +14,51 @@ export async function GET() {
     if (!leaderboardSnap.empty) {
       const entries: LeaderboardEntry[] = leaderboardSnap.docs.map((d) => {
         const data = d.data();
+        const fallbackName = String(data?.name ?? "?").trim() || "?";
         return {
           userId: d.id,
-          name: String(data?.name ?? "?").trim() || "?",
+          name: fallbackName,
           points: Number(data?.points ?? 0),
-          teamName: String(data?.teamName ?? `Time de ${data?.name ?? "?"}`).trim(),
+          teamName: String(data?.teamName ?? `Time de ${fallbackName}`).trim(),
           photoURL: (data?.photoURL as string)?.trim() || undefined,
         };
       });
 
-      const missingIds = entries
-        .filter((e) => !e.photoURL || e.name === "?")
-        .map((e) => e.userId);
-      if (missingIds.length > 0) {
-        const usersSnap = await db.collection("users").get();
-        const userMap = new Map<string, { name: string; photoURL?: string }>();
+      // Sempre prioriza nickname no ranking quando disponível.
+      if (entries.length > 0) {
+        const [usersSnap, nicknamesSnap] = await Promise.all([
+          db.collection("users").get(),
+          db.collection("nicknames").get(),
+        ]);
+        const nicknameByUserId = new Map<string, string>();
+        nicknamesSnap.docs.forEach((d) => {
+          const data = d.data();
+          const uid = String(data?.userId ?? data?.uid ?? d.id ?? "").trim();
+          const nickname = String(data?.nickname ?? "").trim();
+          if (uid && nickname && !nicknameByUserId.has(uid)) {
+            nicknameByUserId.set(uid, nickname);
+          }
+        });
+
+        const userMap = new Map<string, { name: string; nickname?: string; photoURL?: string }>();
         usersSnap.docs.forEach((doc) => {
           const u = doc.data();
+          const name = String(u?.name ?? u?.email ?? "?").trim();
+          const nickname =
+            String(u?.nickname ?? "").trim() || nicknameByUserId.get(doc.id) || "";
           userMap.set(doc.id, {
-            name: String(u?.name ?? u?.email ?? "?").trim(),
+            name,
+            nickname: nickname || undefined,
             photoURL: (u?.photoURL as string)?.trim() || undefined,
           });
         });
         entries.forEach((e) => {
           const u = userMap.get(e.userId);
           if (u) {
+            const displayName = u.nickname || u.name || e.name;
             if (!e.photoURL && u.photoURL) e.photoURL = u.photoURL;
-            if (e.name === "?" && u.name) e.name = u.name;
+            e.name = displayName;
+            e.teamName = `Time de ${displayName}`;
           }
         });
       }
@@ -48,10 +66,21 @@ export async function GET() {
       return NextResponse.json(entries);
     }
 
-    const [usersSnap, lineupsSnap] = await Promise.all([
+    const [usersSnap, nicknamesSnap, lineupsSnap] = await Promise.all([
       db.collection("users").get(),
+      db.collection("nicknames").get(),
       db.collection("match_lineups").get(),
     ]);
+
+    const nicknameByUserId = new Map<string, string>();
+    nicknamesSnap.docs.forEach((d) => {
+      const data = d.data();
+      const uid = String(data?.userId ?? data?.uid ?? d.id ?? "").trim();
+      const nickname = String(data?.nickname ?? "").trim();
+      if (uid && nickname && !nicknameByUserId.has(uid)) {
+        nicknameByUserId.set(uid, nickname);
+      }
+    });
 
     const userIdsWithLineup = new Set(
       lineupsSnap.docs
@@ -63,11 +92,15 @@ export async function GET() {
       .filter((d) => userIdsWithLineup.has(d.id))
       .map((d) => {
         const u = d.data();
+        const fallbackNickname = nicknameByUserId.get(d.id) || "";
+        const displayName = String(
+          u?.nickname ?? fallbackNickname ?? u?.name ?? u?.email ?? "?"
+        ).trim();
         return {
           userId: d.id,
-          name: String(u?.name ?? u?.email ?? "?"),
+          name: displayName,
           points: Number(u?.totalPoints ?? 0),
-          teamName: `Time de ${String(u?.name ?? "?")}`,
+          teamName: `Time de ${displayName}`,
           photoURL: (u?.photoURL as string) || undefined,
         };
       })

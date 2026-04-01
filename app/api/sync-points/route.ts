@@ -29,6 +29,8 @@ export async function POST() {
       const userDoc = usersSnap.docs.find((d) => d.id === userId);
       const userData = userDoc?.data() ?? {};
       const userName = String(userData?.name ?? userData?.email ?? "?").trim();
+      const nickname = String(userData?.nickname ?? "").trim();
+      const displayName = nickname || userName;
       const photoURL = (userData?.photoURL as string) || undefined;
 
       const umDoc = umSnap.docs.find((d) => d.id === userId);
@@ -46,9 +48,9 @@ export async function POST() {
       );
       batch.set(db.collection("leaderboard").doc(userId), {
         userId,
-        name: userName,
+        name: displayName,
         points: total,
-        teamName: `Time de ${userName}`,
+        teamName: `Time de ${displayName}`,
         photoURL: photoURL ?? null,
       });
       updated++;
