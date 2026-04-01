@@ -9,13 +9,11 @@ import { MatchCountdown } from "@/components/MatchCountdown";
 import { PlayerCard } from "@/components/PlayerCard";
 import { Shimmer } from "@/components/Shimmer";
 import { fetchLineup } from "@/services/lineup.service";
-import { fetchAllPlayers } from "@/services/player.service";
+import { fetchAllPlayers, sortPlayersByDisplayOrder } from "@/services/player.service";
 import { fetchNextUpcomingMatch, isTeamEditLocked } from "@/services/match.service";
 import { HOME_TEAM } from "@/services/match.service";
 import type { Player } from "@/types/player";
 import type { Match } from "@/types/match";
-
-const ZONE_ORDER = { GK: 0, DEF: 1, MID: 2, ATT: 3 };
 
 export default function MeuTimePage() {
   const { user, loading: authLoading, isAuthenticated } = useAuth();
@@ -58,12 +56,7 @@ export default function MeuTimePage() {
       } else {
         setPlacar(null);
       }
-      selected.sort(
-        (a, b) =>
-          (ZONE_ORDER[a.position] ?? 4) - (ZONE_ORDER[b.position] ?? 4) ||
-          a.number - b.number
-      );
-      setPlayers(selected);
+      setPlayers(sortPlayersByDisplayOrder(selected));
     }).finally(() => setLoading(false));
   }, [user?.uid, clubId]);
 

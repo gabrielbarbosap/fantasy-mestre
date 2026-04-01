@@ -86,7 +86,7 @@ export default function DashboardPage() {
         </h1>
       </div>
       <p className="mb-8 text-blue-700">
-        Bem-vindo ao Fantasy Club. Monte seu time e dispute o ranking.
+        Bem-vindo ao Bancada FC, a edição para torcedores do Santa Cruz. Monte seu time e dispute o ranking.
       </p>
 
       {mostPicked?.match && (

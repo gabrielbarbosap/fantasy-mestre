@@ -50,7 +50,7 @@ export function Navbar() {
     <nav className="relative border-b border-blue-200 bg-white px-4 py-3 shadow-sm sm:px-6 sm:py-4">
       <div className="mx-auto flex max-w-6xl items-center justify-between">
         <Link href="/" className="text-lg font-bold text-blue-700 sm:text-xl">
-          Fantasy Club
+          Bancada FC
         </Link>
 
         {/* Desktop */}

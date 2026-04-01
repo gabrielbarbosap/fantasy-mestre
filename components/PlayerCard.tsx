@@ -51,11 +51,6 @@ export function PlayerCard({
         {icon}
       </div>
       <span className="text-center font-semibold text-blue-900">{player.name}</span>
-      {!displayOnly && (
-        <span className="mt-1 text-sm font-medium text-blue-700">
-          R$ {player.price.toLocaleString("pt-BR")}
-        </span>
-      )}
       {selected && !displayOnly && (
         <span className="mt-2 text-xs font-medium text-yellow-600">✓ Selecionado</span>
       )}

@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Fantasy Club — Monte seu time e dispute o ranking",
-  description: "Fantasy Club é um jogo de futebol virtual onde você monta seu time, acumula pontos com base nas estatísticas das partidas e compete no ranking. Crie sua conta e participe.",
+  title: "Bancada FC — Edição Santa Cruz",
+  description: "Bancada FC é o fantasy para torcedores do Santa Cruz: monte seu time, some pontos rodada a rodada e dispute o ranking com seus amigos.",
 };
 
 export default function RootLayout({

@@ -58,7 +58,6 @@ export async function fetchSquad(teamId: string): Promise<Player[]> {
     name: p.name,
     position: mapPosition(p.position),
     number: p.number ?? 0,
-    price: 5_000_000,
     active: true,
     photo: p.photo,
   }));

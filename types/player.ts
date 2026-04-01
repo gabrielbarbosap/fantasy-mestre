@@ -5,7 +5,6 @@ export interface Player {
   name: string;
   position: PlayerPosition;
   number: number;
-  price: number;
   active: boolean;
   photo?: string;
   clubId?: string;
