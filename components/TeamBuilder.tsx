@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { PlayerCard } from "./PlayerCard";
 import { Shimmer } from "./Shimmer";
 import { fetchAllPlayers } from "@/services/player.service";
+import { HOME_TEAM } from "@/services/match.service";
 import { SCORING_RULES } from "@/types/database";
 import type { Player } from "@/types/player";
 import type { PlayerPosition } from "@/types/player";
@@ -33,6 +34,7 @@ export function TeamBuilder({
   clubId = "santa-cruz",
   initialSelected = {},
   initialPlacar = { casa: 0, visitante: 0 },
+  matchOpponent,
   onSave,
   loading = false,
   disabled = false,
@@ -40,6 +42,8 @@ export function TeamBuilder({
   clubId?: string;
   initialSelected?: Record<string, boolean>;
   initialPlacar?: { casa: number; visitante: number };
+  /** Nome do adversário (Santa Cruz joga sempre em casa). */
+  matchOpponent?: string;
   onSave: (players: Record<string, boolean>, placar?: { casa: number; visitante: number }) => Promise<void>;
   loading?: boolean;
   disabled?: boolean;
@@ -149,7 +153,9 @@ export function TeamBuilder({
               disabled={disabled}
               className="w-16 rounded border border-blue-300 px-2 py-1 text-center text-lg font-semibold"
             />
-            <span className="text-sm text-blue-600">Casa x Visitante</span>
+            <span className="text-sm text-blue-600">
+              {HOME_TEAM} x {matchOpponent?.trim() || "Adversário"}
+            </span>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-4">

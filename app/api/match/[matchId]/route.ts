@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAdminFirestore } from "@/lib/firebase-admin";
+import { getAdminAuth, getAdminFirestore } from "@/lib/firebase-admin";
+import { SCORING_RULES } from "@/types/database";
 
 function safeNum(v: unknown): number {
   if (typeof v === "number" && !isNaN(v)) return v;
@@ -31,6 +32,23 @@ export interface PlayerMatchStatsItem {
   points: number;
 }
 
+export interface ViewerSquadPlayerRow {
+  playerId: string;
+  name: string;
+  number: number;
+  position: string;
+  photo?: string;
+  points: number;
+}
+
+export interface ViewerSquadBreakdown {
+  lineupFound: boolean;
+  players: ViewerSquadPlayerRow[];
+  correctScoreBonus: number;
+  /** Soma dos pontos dos atletas + bônus de placar */
+  squadTotal: number;
+}
+
 export interface MatchDetailsResponse {
   matchId: string;
   opponent: string;
@@ -40,6 +58,8 @@ export interface MatchDetailsResponse {
   awayGoals?: number;
   users: MatchDetailsUser[];
   playerStats: PlayerMatchStatsItem[];
+  /** Presente quando o cliente envia Authorization Bearer válido */
+  viewerSquad?: ViewerSquadBreakdown;
 }
 
 export async function GET(
@@ -164,6 +184,62 @@ export async function GET(
 
     playerStats.sort((a, b) => b.points - a.points);
 
+    let viewerSquad: ViewerSquadBreakdown | undefined;
+    const authHeader = _req.headers.get("authorization");
+    const bearer = authHeader?.startsWith("Bearer ") ? authHeader.slice(7).trim() : "";
+    if (bearer) {
+      try {
+        const decoded = await getAdminAuth().verifyIdToken(bearer);
+        const uid = decoded.uid;
+        const lineupSnap = await db.collection("match_lineups").doc(`${matchId}_${uid}`).get();
+
+        if (!lineupSnap.exists) {
+          viewerSquad = {
+            lineupFound: false,
+            players: [],
+            correctScoreBonus: 0,
+            squadTotal: 0,
+          };
+        } else {
+          const lineup = lineupSnap.data()!;
+          const playersData = lineup.players as Record<string, unknown> | null | undefined;
+          const squadPlayers: ViewerSquadPlayerRow[] = [];
+          if (playersData && typeof playersData === "object") {
+            for (const pid of Object.keys(playersData)) {
+              const pidStr = String(pid).trim();
+              if (!playersData[pid]) continue;
+              const p = playersMap.get(pidStr);
+              const pos = String(p?.position ?? "");
+              squadPlayers.push({
+                playerId: pidStr,
+                name: p?.name ?? "?",
+                number: safeNum(p?.number),
+                position: (posLabels[pos] ?? pos) || "?",
+                photo: p?.photo || undefined,
+                points: safeNum(playerPointsData[pidStr]),
+              });
+            }
+          }
+          squadPlayers.sort((a, b) => b.points - a.points);
+
+          const predCasa = safeNum(lineup.placarCasa);
+          const predVisit = safeNum(lineup.placarVisitante);
+          const correctScoreBonus =
+            predCasa === homeGoals && predVisit === awayGoals ? SCORING_RULES.correctScore : 0;
+
+          const sumPlayers = squadPlayers.reduce((acc, row) => acc + row.points, 0);
+          viewerSquad = {
+            lineupFound: true,
+            players: squadPlayers,
+            correctScoreBonus,
+            squadTotal: sumPlayers + correctScoreBonus,
+          };
+        }
+      } catch {
+        // token inválido: segue sem viewerSquad
+      }
+    }
+
     const response: MatchDetailsResponse = {
       matchId,
       opponent,
@@ -173,6 +249,7 @@ export async function GET(
       awayGoals,
       users,
       playerStats,
+      ...(viewerSquad ? { viewerSquad } : {}),
     };
 
     return NextResponse.json(response);

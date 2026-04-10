@@ -140,6 +140,7 @@ export default function TeamPage() {
                 casa: lineup?.placarCasa ?? 0,
                 visitante: lineup?.placarVisitante ?? 0,
               }}
+              matchOpponent={match.opponent}
               onSave={handleSave}
               loading={saving}
               disabled={editLocked}

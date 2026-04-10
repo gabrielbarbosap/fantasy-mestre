@@ -230,7 +230,7 @@ export default function PartidaAdminPage() {
     <div className="mx-auto max-w-6xl px-4 py-8">
       <h1 className="mb-2 text-2xl font-bold text-blue-900">Partidas</h1>
       <p className="mb-6 text-blue-700">
-        Santa Cruz x adversário. Crie a partida → usuários editam times até 1h antes → encerre a partida → lance os dados.
+        Santa Cruz x Adversário (mandante fixo). Crie a partida → usuários editam times até 1h antes → encerre a partida → lance os dados.
       </p>
 
       {/* Nova partida */}

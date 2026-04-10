@@ -33,6 +33,20 @@ interface PlayerMatchStatsItem {
   points: number;
 }
 
+interface ViewerSquadBreakdown {
+  lineupFound: boolean;
+  players: Array<{
+    playerId: string;
+    name: string;
+    number: number;
+    position: string;
+    photo?: string;
+    points: number;
+  }>;
+  correctScoreBonus: number;
+  squadTotal: number;
+}
+
 interface MatchDetails {
   matchId: string;
   opponent: string;
@@ -42,15 +56,17 @@ interface MatchDetails {
   awayGoals?: number;
   users: MatchDetailsUser[];
   playerStats: PlayerMatchStatsItem[];
+  viewerSquad?: ViewerSquadBreakdown;
 }
 
 export default function PartidaDetalhesPage() {
   const params = useParams();
   const router = useRouter();
-  const { loading: authLoading, isAuthenticated } = useAuth();
+  const { user, loading: authLoading, isAuthenticated } = useAuth();
   const [details, setDetails] = useState<MatchDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [rankingExpanded, setRankingExpanded] = useState(false);
 
   const matchId = params?.matchId as string;
 
@@ -61,17 +77,40 @@ export default function PartidaDetalhesPage() {
   }, [authLoading, isAuthenticated, router]);
 
   useEffect(() => {
-    if (!matchId) return;
+    if (!matchId || authLoading || !isAuthenticated) return;
 
-    fetch(`/api/match/${matchId}`)
-      .then((res) => {
-        if (!res.ok) throw new Error(res.status === 404 ? "Partida não encontrada" : "Erro ao carregar");
-        return res.json();
-      })
-      .then(setDetails)
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, [matchId]);
+    let cancelled = false;
+
+    (async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const headers: Record<string, string> = {};
+        if (user) {
+          const token = await user.getIdToken();
+          headers.Authorization = `Bearer ${token}`;
+        }
+        const res = await fetch(`/api/match/${matchId}`, { headers });
+        if (!res.ok) {
+          throw new Error(
+            res.status === 404 ? "Partida não encontrada" : "Erro ao carregar"
+          );
+        }
+        const data = (await res.json()) as MatchDetails;
+        if (!cancelled) setDetails(data);
+      } catch (err) {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "Erro ao carregar");
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [matchId, authLoading, isAuthenticated, user]);
 
   if (authLoading || !isAuthenticated) return null;
 
@@ -100,6 +139,11 @@ export default function PartidaDetalhesPage() {
       </div>
     );
   }
+
+  const myRound =
+    user?.uid != null
+      ? details.users.find((u) => u.userId === user.uid)
+      : undefined;
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
@@ -142,6 +186,127 @@ export default function PartidaDetalhesPage() {
         </span>
       </div>
 
+      {user?.uid && (details.users.length > 0 || details.viewerSquad) && (
+        <div className="mb-6 space-y-4 rounded-xl border border-blue-200 bg-white p-6 shadow-sm">
+          {(myRound ||
+            (details.users.length > 0 && !myRound) ||
+            (details.viewerSquad?.lineupFound && details.users.length === 0)) && (
+            <div>
+              <p className="text-sm font-medium text-blue-800">
+                Sua pontuação nesta rodada
+              </p>
+              {myRound ? (
+                <>
+                  <p className="mt-1 text-3xl font-bold text-blue-900">
+                    {myRound.points}{" "}
+                    <span className="text-lg font-semibold text-blue-700">pts</span>
+                  </p>
+                  <p className="mt-2 text-sm text-blue-700">
+                    {myRound.position}º lugar entre {details.users.length}{" "}
+                    {details.users.length === 1
+                      ? "participante"
+                      : "participantes"}
+                  </p>
+                </>
+              ) : details.users.length > 0 ? (
+                <p className="mt-2 text-sm text-blue-800">
+                  Não há pontuação registrada para o seu time nesta rodada.
+                </p>
+              ) : details.viewerSquad?.lineupFound ? (
+                <p className="mt-1 text-3xl font-bold text-blue-900">
+                  {details.viewerSquad.squadTotal}{" "}
+                  <span className="text-lg font-semibold text-blue-700">pts</span>
+                </p>
+              ) : null}
+            </div>
+          )}
+
+          {details.viewerSquad && (
+            <div className="border-t border-blue-200 pt-4">
+              <p className="mb-3 text-sm font-semibold text-blue-900">
+                Pontos por atleta escalado
+              </p>
+              {!details.viewerSquad.lineupFound ? (
+                <p className="text-sm text-blue-700">
+                  Você não montou escalação para esta partida.
+                </p>
+              ) : details.viewerSquad.players.length === 0 ? (
+                <p className="text-sm text-blue-700">
+                  Nenhum jogador foi selecionado na sua escalação.
+                </p>
+              ) : (
+                <div className="overflow-x-auto rounded-xl border border-blue-200 bg-white">
+                  <table className="w-full min-w-[280px] text-sm">
+                    <thead>
+                      <tr className="border-b border-blue-200 bg-blue-50">
+                        <th className="px-3 py-2 text-left font-semibold text-blue-900">
+                          Atleta
+                        </th>
+                        <th className="px-3 py-2 text-center font-semibold text-blue-900">
+                          Nº
+                        </th>
+                        <th className="px-3 py-2 text-left font-semibold text-blue-900">
+                          Pos
+                        </th>
+                        <th className="px-3 py-2 text-right font-semibold text-blue-900">
+                          Pts
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {details.viewerSquad.players.map((p) => (
+                        <tr
+                          key={p.playerId}
+                          className="border-b border-blue-100 last:border-0"
+                        >
+                          <td className="px-3 py-2">
+                            <div className="flex items-center gap-2">
+                              <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full border border-blue-200 bg-blue-50">
+                                {p.photo ? (
+                                  <Image
+                                    src={p.photo}
+                                    alt={p.name}
+                                    fill
+                                    className="object-cover"
+                                    unoptimized
+                                    sizes="32px"
+                                  />
+                                ) : (
+                                  <span className="flex h-full w-full items-center justify-center text-xs font-semibold text-blue-600">
+                                    {p.name?.charAt(0)?.toUpperCase() ?? "?"}
+                                  </span>
+                                )}
+                              </div>
+                              <span className="font-medium text-blue-900">
+                                {p.name}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-3 py-2 text-center text-blue-700">
+                            {p.number}
+                          </td>
+                          <td className="px-3 py-2 text-blue-700">{p.position}</td>
+                          <td className="px-3 py-2 text-right font-semibold text-blue-900">
+                            {p.points}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+              {details.viewerSquad.lineupFound &&
+                details.viewerSquad.correctScoreBonus > 0 && (
+                  <p className="mt-3 rounded-lg bg-blue-50 px-3 py-2 text-sm font-medium text-blue-800">
+                    Acerto no placar: +
+                    {details.viewerSquad.correctScoreBonus} pts
+                  </p>
+                )}
+            </div>
+          )}
+        </div>
+      )}
+
       <h2 className="mb-4 text-lg font-semibold text-blue-900">
         TOP 3 da rodada
       </h2>
@@ -153,70 +318,88 @@ export default function PartidaDetalhesPage() {
           </p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-blue-200">
-          <table className="w-full min-w-[300px]">
-            <thead>
-              <tr className="border-b border-blue-200 bg-blue-50">
-                <th className="px-6 py-4 text-left text-sm font-semibold text-blue-900">
-                  #
-                </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-blue-900">
-                  Participante
-                </th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-blue-900">
-                  Pontos
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {details.users.slice(0, 3).map((u, index) => (
-                <tr
-                  key={u.userId}
-                  className="border-b border-blue-100 last:border-0 hover:bg-white/5"
-                >
-                  <td className="px-6 py-4">
-                    <span
-                      className={`inline-flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium ${
-                        index === 0
-                          ? "bg-yellow-100 text-yellow-800"
-                          : index === 1
-                            ? "bg-blue-200 text-blue-800"
-                            : index === 2
-                              ? "bg-amber-100 text-amber-800"
-                              : "bg-blue-50 text-blue-700"
+        <div className="space-y-3">
+          <div className="overflow-x-auto rounded-xl border border-blue-200">
+            <table className="w-full min-w-[300px]">
+              <thead>
+                <tr className="border-b border-blue-200 bg-blue-50">
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-blue-900">
+                    #
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-blue-900">
+                    Participante
+                  </th>
+                  <th className="px-6 py-4 text-right text-sm font-semibold text-blue-900">
+                    Pontos
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {(rankingExpanded ? details.users : details.users.slice(0, 3)).map(
+                  (u) => (
+                    <tr
+                      key={u.userId}
+                      className={`border-b border-blue-100 last:border-0 hover:bg-blue-50/50 ${
+                        user?.uid === u.userId ? "bg-blue-50" : ""
                       }`}
                     >
-                      {u.position}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border border-blue-200 bg-blue-50">
-                        {u.photoURL ? (
-                          <Image
-                            src={u.photoURL}
-                            alt={u.name}
-                            fill
-                            className="object-cover"
-                            unoptimized
-                            sizes="40px"
-                          />
-                        ) : (
-                          <span className="flex h-full w-full items-center justify-center text-sm font-semibold text-blue-600">
-                            {u.name?.charAt(0)?.toUpperCase() ?? "?"}
-                          </span>
-                        )}
-                      </div>
-                      <span className="font-medium text-blue-900">{u.name}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-right font-semibold text-blue-900">
-                    {u.points} pts
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`inline-flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium ${
+                            u.position === 1
+                              ? "bg-yellow-100 text-yellow-800"
+                              : u.position === 2
+                                ? "bg-blue-200 text-blue-800"
+                                : u.position === 3
+                                  ? "bg-amber-100 text-amber-800"
+                                  : "bg-blue-50 text-blue-700"
+                          }`}
+                        >
+                          {u.position}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border border-blue-200 bg-blue-50">
+                            {u.photoURL ? (
+                              <Image
+                                src={u.photoURL}
+                                alt={u.name}
+                                fill
+                                className="object-cover"
+                                unoptimized
+                                sizes="40px"
+                              />
+                            ) : (
+                              <span className="flex h-full w-full items-center justify-center text-sm font-semibold text-blue-600">
+                                {u.name?.charAt(0)?.toUpperCase() ?? "?"}
+                              </span>
+                            )}
+                          </div>
+                          <span className="font-medium text-blue-900">{u.name}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-right font-semibold text-blue-900">
+                        {u.points} pts
+                      </td>
+                    </tr>
+                  )
+                )}
+              </tbody>
+            </table>
+          </div>
+          {details.users.length > 3 && (
+            <button
+              type="button"
+              onClick={() => setRankingExpanded((v) => !v)}
+              aria-expanded={rankingExpanded}
+              className="w-full rounded-lg border border-blue-200 bg-white px-4 py-2.5 text-sm font-medium text-blue-800 shadow-sm transition-colors hover:bg-blue-50 sm:w-auto"
+            >
+              {rankingExpanded
+                ? "Mostrar apenas o top 3"
+                : `Ver ranking completo (${details.users.length} participantes)`}
+            </button>
+          )}
         </div>
       )}
 
