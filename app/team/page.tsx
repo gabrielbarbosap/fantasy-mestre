@@ -118,7 +118,7 @@ export default function TeamPage() {
             <div className="mb-6 rounded-lg border border-yellow-300 bg-yellow-50 p-4 text-yellow-800">
               <p className="font-medium">Edição bloqueada</p>
               <p className="text-sm">
-                Os times não podem ser alterados a partir de 1 hora antes do início.
+                Os times não podem ser alterados a partir de 30 minutos antes do início.
               </p>
             </div>
           )}

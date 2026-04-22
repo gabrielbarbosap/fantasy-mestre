@@ -6,70 +6,11 @@ export async function GET() {
   try {
     const db = getAdminFirestore();
 
-    const leaderboardSnap = await db
-      .collection("leaderboard")
-      .orderBy("points", "desc")
-      .get();
-
-    if (!leaderboardSnap.empty) {
-      const entries: LeaderboardEntry[] = leaderboardSnap.docs.map((d) => {
-        const data = d.data();
-        const fallbackName = String(data?.name ?? "?").trim() || "?";
-        return {
-          userId: d.id,
-          name: fallbackName,
-          points: Number(data?.points ?? 0),
-          teamName: String(data?.teamName ?? `Time de ${fallbackName}`).trim(),
-          photoURL: (data?.photoURL as string)?.trim() || undefined,
-        };
-      });
-
-      // Sempre prioriza nickname no ranking quando disponível.
-      if (entries.length > 0) {
-        const [usersSnap, nicknamesSnap] = await Promise.all([
-          db.collection("users").get(),
-          db.collection("nicknames").get(),
-        ]);
-        const nicknameByUserId = new Map<string, string>();
-        nicknamesSnap.docs.forEach((d) => {
-          const data = d.data();
-          const uid = String(data?.userId ?? data?.uid ?? d.id ?? "").trim();
-          const nickname = String(data?.nickname ?? "").trim();
-          if (uid && nickname && !nicknameByUserId.has(uid)) {
-            nicknameByUserId.set(uid, nickname);
-          }
-        });
-
-        const userMap = new Map<string, { name: string; nickname?: string; photoURL?: string }>();
-        usersSnap.docs.forEach((doc) => {
-          const u = doc.data();
-          const name = String(u?.name ?? u?.email ?? "?").trim();
-          const nickname =
-            String(u?.nickname ?? "").trim() || nicknameByUserId.get(doc.id) || "";
-          userMap.set(doc.id, {
-            name,
-            nickname: nickname || undefined,
-            photoURL: (u?.photoURL as string)?.trim() || undefined,
-          });
-        });
-        entries.forEach((e) => {
-          const u = userMap.get(e.userId);
-          if (u) {
-            const displayName = u.nickname || u.name || e.name;
-            if (!e.photoURL && u.photoURL) e.photoURL = u.photoURL;
-            e.name = displayName;
-            e.teamName = `Time de ${displayName}`;
-          }
-        });
-      }
-
-      return NextResponse.json(entries);
-    }
-
-    const [usersSnap, nicknamesSnap, lineupsSnap] = await Promise.all([
+    const [usersSnap, nicknamesSnap, lineupsSnap, umSnap] = await Promise.all([
       db.collection("users").get(),
       db.collection("nicknames").get(),
       db.collection("match_lineups").get(),
+      db.collection("user_match_points").get(),
     ]);
 
     const nicknameByUserId = new Map<string, string>();
@@ -88,6 +29,11 @@ export async function GET() {
         .filter(Boolean)
     );
 
+    const matchPointsByUserId = new Map<string, Record<string, unknown>>();
+    umSnap.docs.forEach((d) => {
+      matchPointsByUserId.set(d.id, (d.data() ?? {}) as Record<string, unknown>);
+    });
+
     const entries: LeaderboardEntry[] = usersSnap.docs
       .filter((d) => userIdsWithLineup.has(d.id))
       .map((d) => {
@@ -96,10 +42,15 @@ export async function GET() {
         const displayName = String(
           u?.nickname ?? fallbackNickname ?? u?.name ?? u?.email ?? "?"
         ).trim();
+        const perMatch = matchPointsByUserId.get(d.id) ?? {};
+        let total = 0;
+        for (const v of Object.values(perMatch)) {
+          if (typeof v === "number" && !isNaN(v)) total += v;
+        }
         return {
           userId: d.id,
           name: displayName,
-          points: Number(u?.totalPoints ?? 0),
+          points: total,
           teamName: `Time de ${displayName}`,
           photoURL: (u?.photoURL as string) || undefined,
         };

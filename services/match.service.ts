@@ -70,6 +70,6 @@ export async function fetchNextUpcomingMatch(clubId?: string): Promise<Match | n
 
 export function isTeamEditLocked(match: Match | null): boolean {
   if (!match) return false;
-  const lockTime = new Date(new Date(match.date).getTime() - 60 * 60 * 1000);
+  const lockTime = new Date(new Date(match.date).getTime() - 30 * 60 * 1000);
   return new Date() >= lockTime;
 }

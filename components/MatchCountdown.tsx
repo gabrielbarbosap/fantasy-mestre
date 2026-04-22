@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 
-/** Lock = 1h antes do jogo */
+/** Lock = 30min antes do jogo */
 function getLockTime(dateStr: string): Date {
   const d = new Date(dateStr);
-  return new Date(d.getTime() - 60 * 60 * 1000);
+  return new Date(d.getTime() - 30 * 60 * 1000);
 }
 
 function formatCountdown(ms: number): string {
@@ -60,7 +60,7 @@ export function MatchCountdown({ matchDate, prefix = "Tempo para editar o time:"
         {prefix} <span className="font-bold">{remaining}</span>
       </p>
       <p className="mt-0.5 text-xs opacity-80">
-        Edição bloqueada 1h antes do jogo (horário de Brasília)
+        Edição bloqueada 30min antes do jogo (horário de Brasília)
       </p>
     </div>
   );
