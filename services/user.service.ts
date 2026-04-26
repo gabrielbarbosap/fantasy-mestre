@@ -24,3 +24,8 @@ export async function updateUserPhoto(
   const db = getFirestoreDb();
   await updateDoc(doc(db, "users", userId), { photoURL: photoURL || null });
 }
+
+export async function clearMustChangePassword(userId: string): Promise<void> {
+  const db = getFirestoreDb();
+  await updateDoc(doc(db, "users", userId), { mustChangePassword: false });
+}

@@ -15,4 +15,6 @@ export interface User {
   isPremium?: boolean;
   /** ID da liga em que participa (apenas uma) */
   leagueId?: string;
+  /** Senha foi resetada pelo admin — usuário deve trocar no próximo login */
+  mustChangePassword?: boolean;
 }

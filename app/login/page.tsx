@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { login } from "@/services/auth.service";
+import { fetchUserProfile } from "@/services/user.service";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -18,8 +19,13 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
     try {
-      await login(email, password);
-      router.push("/dashboard");
+      const credential = await login(email, password);
+      const profile = await fetchUserProfile(credential.user.uid);
+      if (profile?.mustChangePassword) {
+        router.push("/trocar-senha");
+      } else {
+        router.push("/dashboard");
+      }
       router.refresh();
     } catch (err) {
       setError("E-mail ou senha inválidos. Tente novamente.");

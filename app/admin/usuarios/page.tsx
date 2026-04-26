@@ -11,6 +11,7 @@ interface UserRow {
   name: string;
   email?: string;
   isPremium?: boolean;
+  mustChangePassword?: boolean;
 }
 
 export default function AdminUsuariosPage() {
@@ -18,6 +19,7 @@ export default function AdminUsuariosPage() {
   const router = useRouter();
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [resettingId, setResettingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -57,6 +59,26 @@ export default function AdminUsuariosPage() {
     }
   };
 
+  const resetPassword = async (userId: string, userName: string) => {
+    if (!confirm(`Resetar a senha de "${userName}" para 123456? O usuário precisará criar uma nova senha no próximo acesso.`)) return;
+    setResettingId(userId);
+    try {
+      const res = await fetch(`/api/admin/users/${userId}/reset-password`, {
+        method: "POST",
+      });
+      if (!res.ok) throw new Error("Erro");
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.userId === userId ? { ...u, mustChangePassword: true } : u
+        )
+      );
+    } catch {
+      alert("Erro ao resetar senha");
+    } finally {
+      setResettingId(null);
+    }
+  };
+
   if (authLoading || !isAuthenticated || !isAdmin(user?.email)) return null;
 
   return (
@@ -76,17 +98,18 @@ export default function AdminUsuariosPage() {
                 <th className="px-4 py-3 text-left font-semibold text-blue-900">Nome</th>
                 <th className="px-4 py-3 text-left font-semibold text-blue-900">E-mail</th>
                 <th className="px-4 py-3 text-left font-semibold text-blue-900">Plano</th>
+                <th className="px-4 py-3 text-left font-semibold text-blue-900">Senha</th>
               </tr>
             </thead>
             <tbody>
               {users.map((u) => {
-                const premium = !!u.isPremium || isAdmin(u.email);
+                const isUserAdmin = isAdmin(u.email);
                 return (
                   <tr key={u.userId} className="border-b border-blue-100 last:border-0">
                     <td className="px-4 py-3 font-medium text-blue-900">{u.name}</td>
                     <td className="px-4 py-3 text-blue-700">{u.email}</td>
                     <td className="px-4 py-3">
-                      {isAdmin(u.email) ? (
+                      {isUserAdmin ? (
                         <span className="text-blue-600">Admin (premium)</span>
                       ) : (
                         <button
@@ -99,6 +122,24 @@ export default function AdminUsuariosPage() {
                         >
                           {u.isPremium ? "Premium" : "Básico"}
                         </button>
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      {isUserAdmin ? (
+                        <span className="text-slate-400 text-xs">—</span>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => resetPassword(u.userId, u.name)}
+                            disabled={resettingId === u.userId}
+                            className="rounded px-3 py-1 text-xs font-medium bg-red-100 text-red-800 hover:bg-red-200 disabled:opacity-50"
+                          >
+                            {resettingId === u.userId ? "Resetando..." : "Resetar senha"}
+                          </button>
+                          {u.mustChangePassword && (
+                            <span className="text-xs text-amber-600 font-medium">Pendente</span>
+                          )}
+                        </div>
                       )}
                     </td>
                   </tr>
